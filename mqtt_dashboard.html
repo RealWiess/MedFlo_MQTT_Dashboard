@@ -924,6 +924,43 @@
             }
         }
 
+        // 顯示 MQTT 離線通知橫幅
+        function showOfflineBanner(msg) {
+            let banner = document.getElementById('mqtt-offline-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'mqtt-offline-banner';
+                banner.style.cssText = `
+                    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+                    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+                    color: #fca5a5; font-size: 14px; font-weight: 600;
+                    padding: 12px 20px; text-align: center;
+                    border-bottom: 2px solid #ef4444;
+                    display: flex; align-items: center; justify-content: center; gap: 10px;
+                    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+                    animation: banner-slide-in 0.3s ease-out;
+                `;
+                banner.innerHTML = `
+                    <span>⚠️</span>
+                    <span id="mqtt-offline-msg"></span>
+                    <button onclick="hideOfflineBanner()" style="
+                        margin-left: 16px; background: rgba(255,255,255,0.15);
+                        border: 1px solid rgba(255,255,255,0.3); color: #fca5a5;
+                        padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+                    ">關閉</button>
+                `;
+                document.body.prepend(banner);
+            }
+            document.getElementById('mqtt-offline-msg').textContent = msg;
+            banner.style.display = 'flex';
+        }
+
+        // 隱藏離線橫幅
+        function hideOfflineBanner() {
+            const banner = document.getElementById('mqtt-offline-banner');
+            if (banner) banner.style.display = 'none';
+        }
+
         function connectMQTT() {
             const proto = document.getElementById('proto').value;
             const host = document.getElementById('host').value;
@@ -946,8 +983,8 @@
                 username: username,
                 password: password,
                 clean: true,
-                connectTimeout: 5000,
-                reconnectPeriod: 4000
+                connectTimeout: 8000,
+                reconnectPeriod: 0  // 設為 0：停用自動重連，避免瀏覽器因無限重連而凍結
             };
 
             console.log(`Connecting to MQTT broker via WebSocket: ${url}`, options);
@@ -962,6 +999,7 @@
                 client.on('connect', () => {
                     console.log('MQTT Connected successfully.');
                     updateStatusUI('connected', host);
+                    hideOfflineBanner(); // 連線成功時自動隱藏錯誤橫幅
                     
                     // Subscribe
                     client.subscribe(topic, (err) => {
@@ -983,13 +1021,22 @@
 
                 client.on('close', () => {
                     console.log('MQTT Connection closed.');
-                    updateStatusUI('disconnected', '連接關閉');
+                    updateStatusUI('disconnected', '連接已關閉');
+                    showOfflineBanner('MQTT 連線已關閉，請確認伺服器狀態後再重新連接。');
+                });
+
+                client.on('offline', () => {
+                    console.warn('MQTT client is offline (no connection).');
+                    updateStatusUI('disconnected', '無法連上伺服器');
+                    showOfflineBanner('無法連上 MQTT 伺服器，請確認主機位址、連接埠與網路狀態。');
                 });
 
                 client.on('error', (err) => {
                     console.error('MQTT Error:', err);
-                    updateStatusUI('disconnected', err.message || '連線錯誤');
-                    addLogMessage('連線錯誤', err.message || '無法連線至代理伺服器。請檢查通訊協定、埠號或跨來源(CORS)設定。', true);
+                    const errMsg = err.message || '連線錯誤';
+                    updateStatusUI('disconnected', errMsg);
+                    showOfflineBanner(`連線失敗：${errMsg}`);
+                    addLogMessage('連線錯誤', errMsg + ' — 請檢查通訊協定、埠號或跨來源(CORS)設定。', true);
                 });
 
             } catch (err) {
