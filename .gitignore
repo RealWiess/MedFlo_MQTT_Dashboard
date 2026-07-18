@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Build artifacts
+CMakeCache.txt
+CMakeFiles/
+*.log
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Shortcut (optional - comment out to include)
+# *.lnk
