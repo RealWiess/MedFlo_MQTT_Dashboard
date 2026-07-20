@@ -751,7 +751,7 @@
                     <div>
                         <label for="proto">通訊協定</label>
                         <select id="proto">
-                            <option value="wss">wss:// (加密)</option>
+                            <option value="wss" selected>wss:// (加密)</option>
                             <option value="ws">ws:// (非加密)</option>
                         </select>
                     </div>
@@ -875,6 +875,8 @@
         let client = null;
         let messages = [];
         let autoScroll = true;
+        let connectionState = 'disconnected'; // 'disconnected' | 'connecting' | 'connected'
+        let renderDevicesTimer = null;
 
         // Toggle password visibility
         function togglePassword(inputId) {
@@ -889,10 +891,30 @@
             }
         }
 
-        // Connect/Disconnect MQTT
+        // Lock/unlock connection configuration form inputs during connection
+        function setInputsDisabled(disabled) {
+            ['proto', 'host', 'port', 'path', 'username', 'password', 'topic'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = disabled;
+            });
+        }
+
+        // Clean up previous client listeners and sockets safely
+        function cleanupClient() {
+            if (client) {
+                try {
+                    client.removeAllListeners();
+                    client.end(true);
+                } catch (e) {
+                    console.warn('Error cleaning up client:', e);
+                }
+                client = null;
+            }
+        }
+
+        // Connect/Disconnect MQTT Toggle Handler
         function toggleConnection() {
-            const btn = document.getElementById('btn-connect');
-            if (client && client.connected) {
+            if (connectionState === 'connected' || connectionState === 'connecting') {
                 disconnectMQTT();
             } else {
                 connectMQTT();
@@ -900,6 +922,7 @@
         }
 
         function updateStatusUI(status, message) {
+            connectionState = status;
             const dot = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
             const btn = document.getElementById('btn-connect');
@@ -908,19 +931,22 @@
             
             if (status === 'connected') {
                 dot.classList.add('connected');
-                text.textContent = '已連線 ' + message;
+                text.textContent = '已連線 ' + (message || '');
                 btn.textContent = '中斷連線';
                 btn.className = 'btn-danger';
+                setInputsDisabled(true);
             } else if (status === 'connecting') {
                 dot.classList.add('connecting');
                 text.textContent = '連線中...';
                 btn.textContent = '取消連接';
                 btn.className = 'btn-secondary';
+                setInputsDisabled(true);
             } else {
                 dot.classList.add('disconnected');
-                text.textContent = '已中斷 (' + message + ')';
+                text.textContent = '已中斷 (' + (message || '未連線') + ')';
                 btn.textContent = '連接伺服器';
                 btn.className = 'btn-primary';
+                setInputsDisabled(false);
             }
         }
 
@@ -963,15 +989,21 @@
 
         function connectMQTT() {
             const proto = document.getElementById('proto').value;
-            const host = document.getElementById('host').value;
-            const port = document.getElementById('port').value;
-            const path = document.getElementById('path').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const topic = document.getElementById('topic').value;
+            const host = document.getElementById('host').value.trim();
+            const port = document.getElementById('port').value.trim();
+            const rawPath = document.getElementById('path').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const topic = document.getElementById('topic').value.trim();
 
-            // Formulate WebSocket URL
-            // mqtt.js expects: ws://host:port/path or wss://host:port/path
+            if (!host || !port) {
+                alert('請輸入有效的 MQTT 伺服器主機與 Port 號碼');
+                return;
+            }
+
+            cleanupClient();
+
+            const path = rawPath ? (rawPath.startsWith('/') ? rawPath : '/' + rawPath) : '';
             const url = `${proto}://${host}:${port}${path}`;
             
             updateStatusUI('connecting');
@@ -984,24 +1016,21 @@
                 password: password,
                 clean: true,
                 connectTimeout: 8000,
-                reconnectPeriod: 0  // 設為 0：停用自動重連，避免瀏覽器因無限重連而凍結
+                reconnectPeriod: 0  // 停用自動重連，避免瀏覽器無限重連卡死
             };
 
             console.log(`Connecting to MQTT broker via WebSocket: ${url}`, options);
+            addLogMessage('系統', `正在嘗試連線至 ${url}...`);
 
             try {
-                if (client) {
-                    client.end(true);
-                }
-
                 client = mqtt.connect(url, options);
 
                 client.on('connect', () => {
+                    if (connectionState !== 'connecting') return;
                     console.log('MQTT Connected successfully.');
                     updateStatusUI('connected', host);
-                    hideOfflineBanner(); // 連線成功時自動隱藏錯誤橫幅
+                    hideOfflineBanner();
                     
-                    // Subscribe
                     client.subscribe(topic, (err) => {
                         if (err) {
                             console.error('Subscription error:', err);
@@ -1020,39 +1049,43 @@
                 });
 
                 client.on('close', () => {
+                    if (connectionState === 'disconnected') return;
                     console.log('MQTT Connection closed.');
+                    cleanupClient();
                     updateStatusUI('disconnected', '連接已關閉');
-                    showOfflineBanner('MQTT 連線已關閉，請確認伺服器狀態後再重新連接。');
+                    showOfflineBanner('MQTT 連線已關閉，請確認伺服器協定(ws/wss)與 Port 是否相符。');
                 });
 
                 client.on('offline', () => {
+                    if (connectionState === 'disconnected') return;
                     console.warn('MQTT client is offline (no connection).');
+                    cleanupClient();
                     updateStatusUI('disconnected', '無法連上伺服器');
-                    showOfflineBanner('無法連上 MQTT 伺服器，請確認主機位址、連接埠與網路狀態。');
+                    showOfflineBanner('無法連上 MQTT 伺服器，請確認主機位址、連接埠 (ws://8083) 與網路狀態。');
                 });
 
                 client.on('error', (err) => {
+                    if (connectionState === 'disconnected') return;
                     console.error('MQTT Error:', err);
-                    const errMsg = err.message || '連線錯誤';
+                    const errMsg = err ? (err.message || '連線錯誤') : '連線錯誤';
+                    cleanupClient();
                     updateStatusUI('disconnected', errMsg);
                     showOfflineBanner(`連線失敗：${errMsg}`);
-                    addLogMessage('連線錯誤', errMsg + ' — 請檢查通訊協定、埠號或跨來源(CORS)設定。', true);
+                    addLogMessage('連線錯誤', `${errMsg} — 若使用 mqtt.go6.tw 請選擇 ws:// 與 Port 8083。`, true);
                 });
 
             } catch (err) {
                 console.error('Connection Init Error:', err);
+                cleanupClient();
                 updateStatusUI('disconnected', err.message);
+                addLogMessage('系統錯誤', `初始化連線失敗: ${err.message}`, true);
             }
         }
 
         function disconnectMQTT() {
-            if (client) {
-                addLogMessage('系統', '正在中斷連線...');
-                client.end(false, () => {
-                    console.log('MQTT disconnected.');
-                    updateStatusUI('disconnected', '手動中斷');
-                });
-            }
+            addLogMessage('系統', '正在中斷連線...');
+            cleanupClient();
+            updateStatusUI('disconnected', '手動中斷');
         }
 
         // Format JSON payload nicely in HTML
@@ -1118,6 +1151,14 @@
 
             // Create DOM element
             createMessageCard(msgObject);
+
+            // Cap DOM elements to max 100 to prevent browser slowdown and window freeze
+            if (container.children.length > 100) {
+                const firstChild = container.firstElementChild;
+                if (firstChild && firstChild.id !== 'empty-state') {
+                    firstChild.remove();
+                }
+            }
         }
 
         function addLogMessage(topic, text, isError = false) {
@@ -1372,8 +1413,17 @@
             });
 
             if (updatedAny) {
-                renderDevicesGrid();
+                scheduleDevicesGridRender();
             }
+        }
+
+        // Throttled render function to prevent DOM thrashing and window freeze
+        function scheduleDevicesGridRender() {
+            if (renderDevicesTimer) return;
+            renderDevicesTimer = setTimeout(() => {
+                renderDevicesTimer = null;
+                renderDevicesGrid();
+            }, 100); // 100ms throttle (max 10 DOM redraws per sec)
         }
 
         // Render device cards into the center panel grid
