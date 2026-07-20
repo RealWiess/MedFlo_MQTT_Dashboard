@@ -63,5 +63,27 @@
 * **-webkit-backdrop-filter 萬用前綴**：為全站毛玻璃視覺樣式（`.card`、`.device-card`）補充 `-webkit-backdrop-filter` 前綴，確保 iOS Safari、iPadOS 以及 macOS Safari 等各式 Apple 設備皆可呈現高質感毛玻璃光澤。
 * **JavaScript ES6+ 標準語法**：全站邏輯均採用跨瀏覽器標準，在 Safari 10+ 均可 100% 穩定順暢運行。
 
+---
+
+## [2026-07-20] 系統升級：雙模式主選單與《滴護寶 SOP 護理安裝與 7 天動態監測引擎》
+
+### 1. 需求與架構變更 (Architectural Refactoring & SOP Integration)
+依照《滴護寶 SOP 操作流程》與護理車行動工作站規格，將 `mqtt_dashboard.html` 重構為具備多頁面切換 (SPA) 路由之護理站中控系統：
+1. **第一頁 (主選單入口 Page 1 - Mode Selection Landing Portal)**：
+   * 包含兩座大尺寸、圓角 (`border-radius: 24px`)、深色毛玻璃與光澤懸浮微動畫大卡片按鍵：
+     - **📡 藍牙儀表板**
+     - **🏥 護理安裝與綁定 SOP**
+2. **第二頁 (藍牙與 MQTT 實時儀表板 Page 2 - Bluetooth Monitor)**：
+   * 完全保留原版面 BT 與 MQTT 數據串流儀表板（一排 4 個微縮狀態卡片 + 最下方全寬 JSON 日誌串流區，不做版面更動）。
+   * 頂部導覽列提供「🏠 返回主選單」與「🏥 護理安裝 SOP」按鈕，便於隨時切換。
+3. **第三頁 (滴護寶 SOP 護理安裝與 7 天倒數牆 Page 3 - SOP Installation Workflow)**：
+   * **步驟 1：護理人員登入 (Nurse Authentication)**：輸入/掃描員編（如 `N1024`）自動帶出護理師姓名（`陳靜宜 護理師`）。
+   * **步驟 2：掃描病人手環 (Patient Wristband Scanner)**：相容 USB 條碼槍，讀取條碼（如 `P311-0812`）並自動帶出床號與病人姓名（`311床 張家豪`）。
+   * **步驟 3：掃描 BT 傳輸器 (BT Sensor MAC Scanner)**：自動去除冒號與無關字元，格式化為標準大寫 12 碼 MAC（如 `F44EFDB20775`）。
+   * **步驟 4：確認綁定與啟動 7 天動態倒數 (Binding & 7-Day Countdown Engine)**：
+     - 確認綁定資訊並建立監測任務，自動啟動 **7 天 (168 小時)** 即時剩餘時間倒數。
+     - 具備**護理站已綁定病人動態監測牆**：實時刷新每位病人的剩餘天/時/分/秒、時間進度條與液位狀態，並支援出院解綁與 LocalStorage 資料持久化。
+
+
 
 

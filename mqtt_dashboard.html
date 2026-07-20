@@ -718,149 +718,706 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
+        /* Multi-Page Navigation & Views */
+        .page-view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.25s ease-in-out;
+            width: 100%;
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .nav-btn {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-main);
+            padding: 0.4rem 0.85rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Page 1: Landing Choice Portal */
+        .landing-container {
+            max-width: 1100px;
+            margin: 3.5rem auto;
+            padding: 0 1.5rem;
+            text-align: center;
+        }
+        .landing-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .landing-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 3.5rem;
+        }
+        .mode-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+        }
+        @media (max-width: 800px) {
+            .mode-cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .mode-card {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 24px;
+            padding: 2.75rem 2rem;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .mode-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 20px 45px -10px rgba(6, 182, 212, 0.3);
+        }
+        .mode-card.highlight:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 20px 45px -10px rgba(16, 185, 129, 0.3);
+        }
+        .mode-icon-glow {
+            font-size: 3.8rem;
+            margin-bottom: 1.25rem;
+            line-height: 1;
+            filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.4));
+        }
+        .mode-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.85rem;
+        }
+        .mode-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2.25rem;
+            flex-grow: 1;
+        }
+        .mode-btn {
+            width: 100%;
+            padding: 0.95rem 1.5rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+        .mode-card:hover .mode-btn {
+            background: var(--accent-cyan);
+            color: white;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+        }
+        .mode-card.highlight:hover .mode-btn {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Page 3: SOP Nursing Installation Wizard & Countdown Tracker */
+        .sop-container {
+            max-width: 1400px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .sop-wizard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+        .sop-steps-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1.25rem;
+        }
+        .sop-step {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            opacity: 0.45;
+            transition: var(--transition);
+        }
+        .sop-step.active {
+            opacity: 1;
+        }
+        .sop-step.completed .step-num {
+            background: var(--accent-green);
+            color: white;
+        }
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .sop-step.active .step-num {
+            background: var(--accent-cyan);
+            color: white;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+        }
+        .step-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .step-connector {
+            flex-grow: 1;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 0 1rem;
+        }
+        .sop-step-panel {
+            display: none;
+        }
+        .sop-step-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sop-step-panel h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.35rem;
+        }
+        .step-hint {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+        .input-with-button {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            max-width: 600px;
+        }
+        .input-with-button input {
+            flex-grow: 1;
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+        }
+        .info-result-card {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+        .info-result-card .info-icon {
+            font-size: 2rem;
+        }
+        .info-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .info-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+        .status-tag.ok {
+            margin-left: auto;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .step-action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-primary.success {
+            background: linear-gradient(135deg, var(--accent-green), #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .summary-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 700px;
+            margin-bottom: 1.5rem;
+        }
+        .summary-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .sum-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .sum-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .sum-value.highlight {
+            font-family: 'Fira Code', monospace;
+            color: var(--accent-cyan);
+        }
+        .bindings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+        .binding-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 14px;
+            padding: 1rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .binding-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .patient-bed {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .patient-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+        .timer-badge {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .timer-progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 0.25rem 0;
+        }
+        .timer-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            transition: width 1s linear;
+        }
+        .btn-small-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-small-danger:hover {
+            background: var(--accent-red);
+            color: white;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-container">
+        <div class="logo-container" onclick="switchPage('landing')" style="cursor: pointer;" title="點擊返回主選單">
             <span class="logo-title">MedFlow</span>
-            <span class="badge">MQTT Dashboard</span>
+            <span class="badge" id="header-page-title">MQTT Dashboard</span>
         </div>
-        <div class="connection-status" id="connection-status-panel">
-            <div class="status-dot" id="status-dot"></div>
-            <span id="status-text">未連線</span>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button class="nav-btn" id="btn-nav-home" onclick="switchPage('landing')" style="display: none;">
+                🏠 返回主選單
+            </button>
+            <button class="nav-btn" id="btn-nav-monitor" onclick="switchPage('monitor')">
+                📡 藍牙儀表
+            </button>
+            <button class="nav-btn" id="btn-nav-sop" onclick="switchPage('sop')">
+                🏥 護理安裝 SOP
+            </button>
+            <div class="connection-status" id="connection-status-panel">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">未連線</span>
+            </div>
         </div>
     </header>
 
-    <div class="main-container">
-        <!-- Sidebar: Configuration and Publish -->
-        <div class="sidebar">
-            <!-- Connection Configuration -->
-            <div class="card">
-                <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16V8a2 2 0 0 0-2-2h-2m-9 0H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/><path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
-                    連線設定 (訂閱端)
-                </div>
-                <div class="form-group row">
-                    <div>
-                        <label for="proto">通訊協定</label>
-                        <select id="proto">
-                            <option value="wss" selected>wss:// (加密)</option>
-                            <option value="ws">ws:// (非加密)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="port">Port</label>
-                        <input type="number" id="port" value="8083">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="host">MQTT 伺服器主機</label>
-                    <input type="text" id="host" value="mqtt.go6.tw">
-                </div>
-                <div class="form-group">
-                    <label for="path">WebSocket Path</label>
-                    <input type="text" id="path" value="/mqtt" placeholder="例如 /mqtt">
-                    <div class="helper-text">EMQX 通常為 /mqtt 或空值</div>
-                </div>
-                <div class="form-group row">
-                    <div>
-                        <label for="username">使用者名稱</label>
-                        <input type="text" id="username" value="DCareR">
-                    </div>
-                    <div>
-                        <label for="password">密碼</label>
-                        <div class="password-container">
-                            <input type="password" id="password" value="6yhgvfr4">
-                            <button class="password-toggle" type="button" onclick="togglePassword('password')">顯示</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="topic">訂閱 Topic</label>
-                    <input type="text" id="topic" value="DCare/d/#">
-                </div>
-                <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
-                    <button class="btn-primary" id="btn-connect" onclick="toggleConnection()">連接伺服器</button>
-                </div>
+    <!-- Page 1: Landing Choice Portal (主選單) -->
+    <div id="page-landing" class="page-view active">
+        <div class="landing-container">
+            <div class="landing-header">
+                <h2>請選擇 MedFlow 滴護寶系統操作模式</h2>
+                <p>智慧醫療物聯網護理站中控與行動工作站輔助系統</p>
             </div>
+            <div class="mode-cards-grid">
+                <!-- Mode 1: Bluetooth & MQTT Monitor -->
+                <div class="mode-card" onclick="switchPage('monitor')">
+                    <div class="mode-icon-glow">📡</div>
+                    <h3 class="mode-title">藍牙儀表板</h3>
+                    <p class="mode-desc">即時監控區域內所有網關 (Gateway) 廣播遙測封包、MQTT 伺服器連線狀態、點滴與尿袋實時狀態牆與 JSON 即時訊息串流解析。</p>
+                    <button class="mode-btn">進入藍牙儀表板 →</button>
+                </div>
 
-            <!-- Publish Test Message -->
-            <div class="card">
-                <div class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                    模擬發布測試 (寫入端)
-                </div>
-                <div class="form-group row">
-                    <div>
-                        <label for="w-username">寫入用戶</label>
-                        <input type="text" id="w-username" value="DCareW">
-                    </div>
-                    <div>
-                        <label for="w-password">寫入密碼</label>
-                        <div class="password-container">
-                            <input type="password" id="w-password" value="4rfghy6">
-                            <button class="password-toggle" type="button" onclick="togglePassword('w-password')">顯示</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="pub-topic">發布 Topic</label>
-                    <input type="text" id="pub-topic" value="DCare/d/test_gw" placeholder="DCare/d/<gwid>">
-                </div>
-                <div class="form-group">
-                    <label for="pub-payload">發布 Payload (JSON/Text)</label>
-                    <textarea id="pub-payload">[\n  {\n    "time": "2026-07-15T16:22:13+08:00",\n    "gwid": "test_gw",\n    "rssi": -65,\n    "stat": 0,\n    "cnt": 12,\n    "mac": "A1B2C3D4E5F6",\n    "data": "02010614094D4544464C4F2D41314232433344344535463605FFFFFF0001"\n  }\n]</textarea>
-                </div>
-                <button class="btn-secondary" id="btn-publish" onclick="publishTestMessage()">發送發布訊息</button>
-                <div class="helper-text" style="color: var(--accent-cyan); text-align: center; margin-top: 0.5rem; display: none;" id="pub-status">
-                    發送成功！
+                <!-- Mode 2: Nursing Installation SOP -->
+                <div class="mode-card highlight" onclick="switchPage('sop')">
+                    <div class="mode-icon-glow">🏥</div>
+                    <h3 class="mode-title">護理安裝與綁定 SOP</h3>
+                    <p class="mode-desc">行動護理推車標準作業流程：護理人員驗證登入、掃描病人手環條碼、掃描 BT 傳輸器條碼，自動綁定病人並啟動 7 天動態倒數計時監測。</p>
+                    <button class="mode-btn">進入護理安裝流程 →</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Center Panel: BLE Devices Live Dashboard -->
-        <div class="dashboard-panel">
-            <div class="section-title-bar">
-                <div class="section-title">🏥 滴護寶裝置實時狀態</div>
-                <div class="device-count-badge" id="device-count-badge">0 個裝置在線</div>
+    <!-- Page 2: Bluetooth & MQTT Monitor Dashboard -->
+    <div id="page-monitor" class="page-view">
+        <div class="main-container">
+            <!-- Sidebar: Configuration and Publish -->
+            <div class="sidebar">
+                <!-- Connection Configuration -->
+                <div class="card">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16V8a2 2 0 0 0-2-2h-2m-9 0H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/><path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+                        連線設定 (訂閱端)
+                    </div>
+                    <div class="form-group row">
+                        <div>
+                            <label for="proto">通訊協定</label>
+                            <select id="proto">
+                                <option value="wss" selected>wss:// (加密)</option>
+                                <option value="ws">ws:// (非加密)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="port">Port</label>
+                            <input type="number" id="port" value="8083">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="host">MQTT 伺服器主機</label>
+                        <input type="text" id="host" value="mqtt.go6.tw">
+                    </div>
+                    <div class="form-group">
+                        <label for="path">WebSocket Path</label>
+                        <input type="text" id="path" value="/mqtt" placeholder="例如 /mqtt">
+                        <div class="helper-text">EMQX 通常為 /mqtt 或空值</div>
+                    </div>
+                    <div class="form-group row">
+                        <div>
+                            <label for="username">使用者名稱</label>
+                            <input type="text" id="username" value="DCareR">
+                        </div>
+                        <div>
+                            <label for="password">密碼</label>
+                            <div class="password-container">
+                                <input type="password" id="password" value="6yhgvfr4">
+                                <button class="password-toggle" type="button" onclick="togglePassword('password')">顯示</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic">訂閱 Topic</label>
+                        <input type="text" id="topic" value="DCare/d/#">
+                    </div>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                        <button class="btn-primary" id="btn-connect" onclick="toggleConnection()">連接伺服器</button>
+                    </div>
+                </div>
+
+                <!-- Publish Test Message -->
+                <div class="card">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        模擬發布測試 (寫入端)
+                    </div>
+                    <div class="form-group row">
+                        <div>
+                            <label for="w-username">寫入用戶</label>
+                            <input type="text" id="w-username" value="DCareW">
+                        </div>
+                        <div>
+                            <label for="w-password">寫入密碼</label>
+                            <div class="password-container">
+                                <input type="password" id="w-password" value="4rfghy6">
+                                <button class="password-toggle" type="button" onclick="togglePassword('w-password')">顯示</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pub-topic">發布 Topic</label>
+                        <input type="text" id="pub-topic" value="DCare/d/test_gw" placeholder="DCare/d/<gwid>">
+                    </div>
+                    <div class="form-group">
+                        <label for="pub-payload">發布 Payload (JSON/Text)</label>
+                        <textarea id="pub-payload">[\n  {\n    "time": "2026-07-15T16:22:13+08:00",\n    "gwid": "test_gw",\n    "rssi": -65,\n    "stat": 0,\n    "cnt": 12,\n    "mac": "A1B2C3D4E5F6",\n    "data": "02010614094D4544464C4F2D41314232433344344535463605FFFFFF0001"\n  }\n]</textarea>
+                    </div>
+                    <button class="btn-secondary" id="btn-publish" onclick="publishTestMessage()">發送發布訊息</button>
+                    <div class="helper-text" style="color: var(--accent-cyan); text-align: center; margin-top: 0.5rem; display: none;" id="pub-status">
+                        發送成功！
+                    </div>
+                </div>
             </div>
-            <div class="devices-grid" id="devices-grid">
-                <div class="empty-state">
-                    <span class="empty-icon">📡</span>
-                    <h3>未偵測到藍牙裝置</h3>
-                    <p>連線後，系統將實時解析網關上報的廣播封包並顯示於此。</p>
+
+            <!-- Center Panel: BLE Devices Live Dashboard -->
+            <div class="dashboard-panel">
+                <div class="section-title-bar">
+                    <div class="section-title">🏥 滴護寶裝置實時狀態</div>
+                    <div class="device-count-badge" id="device-count-badge">0 個裝置在線</div>
+                </div>
+                <div class="devices-grid" id="devices-grid">
+                    <div class="empty-state">
+                        <span class="empty-icon">📡</span>
+                        <h3>未偵測到藍牙裝置</h3>
+                        <p>連線後，系統將實時解析網關上報的廣播封包並顯示於此。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Message Viewer (Right Panel) -->
+            <div class="viewer-panel">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="過濾 Topic 或內容..." oninput="filterMessages()">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-icon" onclick="toggleScroll()" id="btn-scroll">
+                            <span id="scroll-icon">⬇️</span> <span id="scroll-text">自動捲動</span>
+                        </button>
+                        <button class="btn-icon" onclick="clearMessages()">
+                            🗑️ 清除面板
+                        </button>
+                        <button class="btn-icon" onclick="exportMessages()">
+                            📥 匯出 JSON
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Message Stream Log -->
+                <div class="messages-container" id="messages-container">
+                    <div class="empty-state" id="empty-state">
+                        <span class="empty-icon">📡</span>
+                        <h3>尚未有即時 MQTT 訊息</h3>
+                        <p>請確認您的連線設定，點擊「連接伺服器」訂閱主題。</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Live Message Viewer (Right Panel) -->
-        <div class="viewer-panel">
-            <div class="toolbar">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="search-input" placeholder="過濾 Topic 或內容..." oninput="filterMessages()">
+    <!-- Page 3: Nursing Installation SOP Workflow -->
+    <div id="page-nursing-sop" class="page-view">
+        <div class="sop-container">
+            <!-- SOP Wizard Card -->
+            <div class="sop-wizard-card">
+                <div class="sop-steps-bar">
+                    <div class="sop-step active" id="step-node-1">
+                        <span class="step-num">1</span>
+                        <span class="step-text">護理師登入</span>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="sop-step" id="step-node-2">
+                        <span class="step-num">2</span>
+                        <span class="step-text">掃描病人手環</span>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="sop-step" id="step-node-3">
+                        <span class="step-num">3</span>
+                        <span class="step-text">掃描 BT 傳輸器</span>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="sop-step" id="step-node-4">
+                        <span class="step-num">4</span>
+                        <span class="step-text">綁定與啟動計時</span>
+                    </div>
                 </div>
-                <div class="action-buttons">
-                    <button class="btn-icon" onclick="toggleScroll()" id="btn-scroll">
-                        <span id="scroll-icon">⬇️</span> <span id="scroll-text">自動捲動</span>
-                    </button>
-                    <button class="btn-icon" onclick="clearMessages()">
-                        🗑️ 清除面板
-                    </button>
-                    <button class="btn-icon" onclick="exportMessages()">
-                        📥 匯出 JSON
-                    </button>
+
+                <!-- Form Wizard Step Panels -->
+                <div class="sop-form-content">
+                    <!-- Step 1: Nurse Login -->
+                    <div class="sop-step-panel active" id="panel-step-1">
+                        <h3>第一步：請輸入或掃描護理人員號碼</h3>
+                        <p class="step-hint">支援 USB 掃描槍或直接輸入護理師員編 (例如: N1024, N8888)</p>
+                        <div class="input-with-button">
+                            <input type="text" id="nurse-id-input" placeholder="請輸入護理人員代號 (例如: N1024)..." onkeydown="if(event.key==='Enter') verifyNurse()">
+                            <button class="btn-primary" onclick="verifyNurse()">驗證人員代號</button>
+                        </div>
+                        <div id="nurse-info-box" class="info-result-card" style="display: none;">
+                            <span class="info-icon">👤</span>
+                            <div>
+                                <div class="info-title" id="nurse-name-display">陳靜宜 護理師</div>
+                                <div class="info-sub" id="nurse-id-display">員編: N1024 | 單位: 7樓一般外科護理站</div>
+                            </div>
+                            <span class="status-tag ok">✓ 已認證</span>
+                        </div>
+                        <div class="step-action-bar">
+                            <button class="btn-primary" id="btn-to-step2" disabled onclick="gotoSopStep(2)">下一步：掃描病人手環 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Patient Wristband Scanner -->
+                    <div class="sop-step-panel" id="panel-step-2">
+                        <h3>第二步：請掃描病人手環二維碼 / QR Code</h3>
+                        <p class="step-hint">請使用 USB 條碼槍對準病人手環 (例如條碼: P311-0812 或 P2026-0812)</p>
+                        <div class="input-with-button">
+                            <input type="text" id="patient-scan-input" placeholder="等待手環條碼掃描中 (例如 P311-0812)..." onkeydown="if(event.key==='Enter') parsePatientBarcode()">
+                            <button class="btn-primary" onclick="parsePatientBarcode()">解析手環條碼</button>
+                        </div>
+                        <div id="patient-info-box" class="info-result-card" style="display: none;">
+                            <span class="info-icon">🏥</span>
+                            <div>
+                                <div class="info-title" id="patient-name-display">311床 - 張家豪</div>
+                                <div class="info-sub" id="patient-id-display">病歷號: P2026-0812 | 主治醫師: 林德明 醫師</div>
+                            </div>
+                            <span class="status-tag ok">✓ 已讀取手環</span>
+                        </div>
+                        <div class="step-action-bar">
+                            <button class="btn-secondary" onclick="gotoSopStep(1)">← 上一步</button>
+                            <button class="btn-primary" id="btn-to-step3" disabled onclick="gotoSopStep(3)">下一步：掃描 BT 傳輸器 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: BT Sensor MAC Scanner -->
+                    <div class="sop-step-panel" id="panel-step-3">
+                        <h3>第三步：請掃描 BT 傳輸器二維碼 (MAC Address)</h3>
+                        <p class="step-hint">請對準傳輸器 QR Code 條碼 (自動清除冒號整理為標準 MAC，如 F44EFDB20775)</p>
+                        <div class="input-with-button">
+                            <input type="text" id="bt-scan-input" placeholder="等待 BT 傳輸器條碼掃描中 (例如 F44E:FD:B2:07:75)..." onkeydown="if(event.key==='Enter') parseBTBarcode()">
+                            <button class="btn-primary" onclick="parseBTBarcode()">解析 BT 感測器</button>
+                        </div>
+                        <div id="bt-info-box" class="info-result-card" style="display: none;">
+                            <span class="info-icon">📡</span>
+                            <div>
+                                <div class="info-title" id="bt-mac-display">F44EFDB20775</div>
+                                <div class="info-sub" id="bt-status-display">裝置類型: Poseidon BLE 液位/尿袋感測傳輸器</div>
+                            </div>
+                            <span class="status-tag ok">✓ 感測器就緒</span>
+                        </div>
+                        <div class="step-action-bar">
+                            <button class="btn-secondary" onclick="gotoSopStep(2)">← 上一步</button>
+                            <button class="btn-primary" id="btn-to-step4" disabled onclick="gotoSopStep(4)">下一步：確認綁定與開始計時 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Binding Summary & Start 7-Day Countdown -->
+                    <div class="sop-step-panel" id="panel-step-4">
+                        <h3>第四步：確認綁定資訊並啟動 7 天監測任務</h3>
+                        <p class="step-hint">確認無誤後點擊「開始 7 天計時」，系統將將病人與 BT 傳輸器綁定並開始實時倒數。</p>
+                        
+                        <div class="summary-cards-grid">
+                            <div class="summary-item">
+                                <span class="sum-label">護理人員</span>
+                                <span class="sum-value" id="sum-nurse-name">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="sum-label">病人與床號</span>
+                                <span class="sum-value" id="sum-patient-info">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="sum-label">BT 傳輸器 MAC</span>
+                                <span class="sum-value highlight" id="sum-bt-mac">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="sum-label">預計監測期限</span>
+                                <span class="sum-value" style="color: var(--accent-green);">7 天 (168 小時)</span>
+                            </div>
+                        </div>
+
+                        <div class="step-action-bar">
+                            <button class="btn-secondary" onclick="gotoSopStep(3)">← 上一步</button>
+                            <button class="btn-primary success" onclick="confirmBindingAndStartTimer()">🚀 確認綁定並開始 7 天計時</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Message Stream Log -->
-            <div class="messages-container" id="messages-container">
-                <div class="empty-state" id="empty-state">
-                    <span class="empty-icon">📡</span>
-                    <h3>尚未有即時 MQTT 訊息</h3>
-                    <p>請確認您的連線設定，點擊「連接伺服器」訂閱主題。</p>
+            <!-- Active Patients & 7-Day Countdown Tracker Table -->
+            <div class="active-bindings-section">
+                <div class="section-title-bar">
+                    <div class="section-title">⏱️ 護理站已綁定病人 7 天動態監測牆</div>
+                    <div class="device-count-badge" id="active-binding-count">0 位病人監測中</div>
+                </div>
+                <div class="bindings-grid" id="bindings-grid">
+                    <!-- Dynamic Binding Cards inserted here -->
                 </div>
             </div>
         </div>
@@ -1566,6 +2123,348 @@
             activeDevices = {};
             renderDevicesGrid();
         };
+
+        /* =========================================================
+         * 1. Multi-Page SPA Navigation System
+         * ========================================================= */
+        let currentPage = 'landing';
+
+        function switchPage(pageId) {
+            currentPage = pageId;
+            document.querySelectorAll('.page-view').forEach(el => {
+                el.classList.remove('active');
+            });
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Header navigation buttons & titles
+            const btnHome = document.getElementById('btn-nav-home');
+            const btnMonitor = document.getElementById('btn-nav-monitor');
+            const btnSop = document.getElementById('btn-nav-sop');
+            const headerTitle = document.getElementById('header-page-title');
+
+            if (pageId === 'landing') {
+                btnHome.style.display = 'none';
+                btnMonitor.style.display = 'inline-flex';
+                btnSop.style.display = 'inline-flex';
+                headerTitle.textContent = '系統模式選擇';
+            } else if (pageId === 'monitor') {
+                btnHome.style.display = 'inline-flex';
+                btnMonitor.style.display = 'none';
+                btnSop.style.display = 'inline-flex';
+                headerTitle.textContent = '藍牙儀表板';
+            } else if (pageId === 'sop') {
+                btnHome.style.display = 'inline-flex';
+                btnMonitor.style.display = 'inline-flex';
+                btnSop.style.display = 'none';
+                headerTitle.textContent = '護理安裝 SOP';
+                // Focus on step 1 input if on SOP page
+                setTimeout(() => {
+                    const input = document.getElementById('nurse-id-input');
+                    if (input && !currentNurse) input.focus();
+                }, 100);
+            }
+        }
+
+        /* =========================================================
+         * 2. SOP Nursing Installation Workflow State & Handlers
+         * ========================================================= */
+        let currentSopStep = 1;
+        let currentNurse = null;
+        let currentPatient = null;
+        let currentBtSensor = null;
+        let activeBindings = [];
+
+        // Nurse Database Map
+        const nurseDatabase = {
+            "N1024": { name: "陳靜宜 護理師", unit: "7樓一般外科護理站" },
+            "N8888": { name: "王雅芬 護理長", unit: "3樓加護病房 (ICU)" },
+            "N1001": { name: "林姿君 護理師", unit: "5樓內科護理站" },
+            "N5566": { name: "黃志明 護理師", unit: "8樓急診後送病房" }
+        };
+
+        // Step 1: Verify Nurse ID
+        function verifyNurse() {
+            const input = document.getElementById('nurse-id-input');
+            const val = input.value.trim().toUpperCase();
+            if (!val) {
+                alert('請輸入或掃描護理人員代號');
+                return;
+            }
+
+            let nurseInfo = nurseDatabase[val];
+            if (!nurseInfo) {
+                nurseInfo = { name: `護理人員 (${val})`, unit: "智慧護理推車工作站" };
+            }
+
+            currentNurse = {
+                id: val,
+                name: nurseInfo.name,
+                unit: nurseInfo.unit
+            };
+
+            document.getElementById('nurse-name-display').textContent = currentNurse.name;
+            document.getElementById('nurse-id-display').textContent = `員編: ${currentNurse.id} | 單位: ${currentNurse.unit}`;
+            document.getElementById('nurse-info-box').style.display = 'flex';
+            document.getElementById('btn-to-step2').disabled = false;
+        }
+
+        // Step 2: Parse Patient Wristband Barcode
+        function parsePatientBarcode() {
+            const input = document.getElementById('patient-scan-input');
+            const val = input.value.trim();
+            if (!val) {
+                alert('請掃描或輸入病人手環條碼');
+                return;
+            }
+
+            // Extract Bed Number & Name
+            let bed = "311床";
+            let name = "張家豪";
+            let chartNo = val;
+
+            if (val.includes('-')) {
+                const parts = val.split('-');
+                bed = parts[0].replace('P', '') + "床";
+                name = "張家豪 (手環: " + val + ")";
+            } else if (val.length > 3) {
+                bed = val.substr(0, 3) + "床";
+                name = "病人 " + val;
+            }
+
+            currentPatient = {
+                rawBarcode: val,
+                bed: bed,
+                name: name,
+                chartNo: chartNo,
+                doctor: "林德明 醫師"
+            };
+
+            document.getElementById('patient-name-display').textContent = `${currentPatient.bed} - ${currentPatient.name}`;
+            document.getElementById('patient-id-display').textContent = `病歷/手環號: ${currentPatient.chartNo} | 主治醫師: ${currentPatient.doctor}`;
+            document.getElementById('patient-info-box').style.display = 'flex';
+            document.getElementById('btn-to-step3').disabled = false;
+        }
+
+        // Step 3: Parse BT Sensor MAC Barcode
+        function parseBTBarcode() {
+            const input = document.getElementById('bt-scan-input');
+            const val = input.value.trim();
+            if (!val) {
+                alert('請掃描或輸入 BT 傳輸器 QR Code');
+                return;
+            }
+
+            // Normalize MAC: strip colons, dashes, spaces, convert to uppercase
+            let cleanMac = val.replace(/[^A-Fa-f0-9]/g, '').toUpperCase();
+            if (cleanMac.length < 12) {
+                // Pad if short for demo
+                cleanMac = (cleanMac + "F44EFDB20775").substr(0, 12);
+            } else if (cleanMac.length > 12) {
+                cleanMac = cleanMac.substr(0, 12);
+            }
+
+            currentBtSensor = {
+                rawInput: val,
+                mac: cleanMac,
+                formattedMac: cleanMac.match(/.{1,2}/g).join(':')
+            };
+
+            document.getElementById('bt-mac-display').textContent = `${currentBtSensor.mac} (${currentBtSensor.formattedMac})`;
+            document.getElementById('bt-status-display').textContent = `裝置類型: Poseidon BLE 液位/尿袋感測傳輸器`;
+            document.getElementById('bt-info-box').style.display = 'flex';
+            document.getElementById('btn-to-step4').disabled = false;
+        }
+
+        // Step Wizard Navigation
+        function gotoSopStep(stepNum) {
+            currentSopStep = stepNum;
+
+            // Update Steps bar
+            for (let i = 1; i <= 4; i++) {
+                const stepNode = document.getElementById('step-node-' + i);
+                const stepPanel = document.getElementById('panel-step-' + i);
+                
+                if (i < stepNum) {
+                    stepNode.className = 'sop-step completed';
+                } else if (i === stepNum) {
+                    stepNode.className = 'sop-step active';
+                } else {
+                    stepNode.className = 'sop-step';
+                }
+
+                if (i === stepNum) {
+                    stepPanel.classList.add('active');
+                } else {
+                    stepPanel.classList.remove('active');
+                }
+            }
+
+            // Step 4 Summary Update
+            if (stepNum === 4) {
+                document.getElementById('sum-nurse-name').textContent = currentNurse ? currentNurse.name : '-';
+                document.getElementById('sum-patient-info').textContent = currentPatient ? `${currentPatient.bed} (${currentPatient.name})` : '-';
+                document.getElementById('sum-bt-mac').textContent = currentBtSensor ? currentBtSensor.mac : '-';
+            }
+
+            // Auto-focus active step input
+            setTimeout(() => {
+                if (stepNum === 1) document.getElementById('nurse-id-input').focus();
+                else if (stepNum === 2) document.getElementById('patient-scan-input').focus();
+                else if (stepNum === 3) document.getElementById('bt-scan-input').focus();
+            }, 100);
+        }
+
+        // Step 4: Confirm Binding & Start 7-Day Countdown
+        function confirmBindingAndStartTimer() {
+            if (!currentNurse || !currentPatient || !currentBtSensor) {
+                alert('請完整完成 1~3 步驟安裝流程');
+                return;
+            }
+
+            const DURATION_7_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+            const startTime = Date.now();
+            const endTime = startTime + DURATION_7_DAYS_MS;
+
+            const bindingRecord = {
+                id: 'bind_' + Date.now(),
+                nurse: currentNurse,
+                patient: currentPatient,
+                btSensor: currentBtSensor,
+                startTime: startTime,
+                endTime: endTime,
+                durationMs: DURATION_7_DAYS_MS
+            };
+
+            // Remove previous binding with same MAC or Patient if exists
+            activeBindings = activeBindings.filter(b => b.btSensor.mac !== currentBtSensor.mac && b.patient.chartNo !== currentPatient.chartNo);
+            activeBindings.unshift(bindingRecord);
+            saveBindings();
+            renderActiveBindings();
+
+            alert(`✅ 成功完成綁定！\n病人：${currentPatient.bed} (${currentPatient.name})\nBT 傳輸器：${currentBtSensor.mac}\n7 天監測倒數已啟動！`);
+
+            // Reset SOP form to Step 1 for next patient
+            currentPatient = null;
+            currentBtSensor = null;
+            document.getElementById('patient-scan-input').value = '';
+            document.getElementById('patient-info-box').style.display = 'none';
+            document.getElementById('btn-to-step3').disabled = true;
+            document.getElementById('bt-scan-input').value = '';
+            document.getElementById('bt-info-box').style.display = 'none';
+            document.getElementById('btn-to-step4').disabled = true;
+            gotoSopStep(1);
+        }
+
+        // Unbind Patient
+        function unbindPatient(id) {
+            if (confirm('確定要解除此病人的 7 天監測任務與 BT 感測器綁定嗎？')) {
+                activeBindings = activeBindings.filter(b => b.id !== id);
+                saveBindings();
+                renderActiveBindings();
+            }
+        }
+
+        // LocalStorage Helpers
+        function saveBindings() {
+            try {
+                localStorage.setItem('medflow_active_bindings', JSON.stringify(activeBindings));
+            } catch (e) {}
+        }
+
+        function loadBindings() {
+            try {
+                const saved = localStorage.getItem('medflow_active_bindings');
+                if (saved) {
+                    activeBindings = JSON.parse(saved);
+                }
+            } catch (e) {
+                activeBindings = [];
+            }
+        }
+
+        // Render Active 7-Day Countdown Cards
+        function renderActiveBindings() {
+            const grid = document.getElementById('bindings-grid');
+            const badge = document.getElementById('active-binding-count');
+            if (!grid) return;
+
+            badge.textContent = `${activeBindings.length} 位病人監測中`;
+
+            if (activeBindings.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; padding: 2rem;">
+                        <span class="empty-icon">⏱️</span>
+                        <h3>尚無進行中的 7 天監測任務</h3>
+                        <p>請依照上方 1~4 SOP 步驟完成病人與藍牙傳輸器綁定。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = Date.now();
+            let html = "";
+
+            activeBindings.forEach(b => {
+                const remainingMs = Math.max(0, b.endTime - now);
+                const isExpired = remainingMs === 0;
+
+                const days = Math.floor(remainingMs / (24 * 3600 * 1000));
+                const hours = Math.floor((remainingMs % (24 * 3600 * 1000)) / (3600 * 1000));
+                const minutes = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
+                const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
+
+                const timeStr = isExpired
+                    ? "⚠️ 已到期 (7天完成)"
+                    : `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
+
+                const progressPct = Math.min(100, Math.max(0, (remainingMs / b.durationMs) * 100));
+
+                // Check live BLE status if available
+                const bleDev = activeDevices[b.btSensor.mac];
+                let bleStatusHtml = '<span style="color: var(--text-muted);">廣播連線中...</span>';
+                if (bleDev) {
+                    const isFull = bleDev.stat === 0;
+                    bleStatusHtml = isFull 
+                        ? `<span style="color: var(--accent-cyan); font-weight: bold;">💧 尿袋滿 (LOW)</span>`
+                        : `<span style="color: var(--accent-green); font-weight: bold;">🟢 尿袋空 (HIGH)</span>`;
+                }
+
+                html += `
+                    <div class="binding-card">
+                        <div class="binding-card-header">
+                            <div>
+                                <div class="patient-bed">🏥 ${b.patient.bed} - ${b.patient.name}</div>
+                                <div class="patient-sub">綁定員編: ${b.nurse.name} | MAC: ${b.btSensor.mac}</div>
+                            </div>
+                            <button class="btn-small-danger" onclick="unbindPatient('${b.id}')">解綁/完成</button>
+                        </div>
+
+                        <div class="timer-progress-bar">
+                            <div class="timer-progress-fill" style="width: ${progressPct}%;"></div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+                            <span class="timer-badge" title="預計使用 7 天 (168 小時)">
+                                ⏱️ 剩餘: ${timeStr}
+                            </span>
+                            <div style="font-size: 0.82rem;">
+                                ${bleStatusHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // Initialize SOP bindings & countdown ticker
+        loadBindings();
+        renderActiveBindings();
+        setInterval(renderActiveBindings, 1000);
     </script>
 </body>
 </html>
