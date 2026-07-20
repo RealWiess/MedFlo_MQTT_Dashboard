@@ -1336,10 +1336,10 @@
 
                     <!-- Step 2: Patient Wristband Scanner -->
                     <div class="sop-step-panel" id="panel-step-2">
-                        <h3>第二步：請掃描病人手環二維碼 / QR Code</h3>
-                        <p class="step-hint">請使用 USB 條碼槍對準病人手環 (例如條碼: P311-0812 或 P2026-0812)</p>
+                        <h3>第二步：請掃描或鍵盤輸入病人手環條碼 (QR Code)</h3>
+                        <p class="step-hint">支援 USB 掃描槍或直接鍵盤輸入 (例如: 8位數字 31100812，輸入 7777777 開頭為虛擬測試病人)</p>
                         <div class="input-with-button">
-                            <input type="text" id="patient-scan-input" placeholder="等待手環條碼掃描中 (例如 P311-0812)..." onkeydown="if(event.key==='Enter') parsePatientBarcode()">
+                            <input type="text" id="patient-scan-input" placeholder="掃描或鍵盤輸入病人條碼 (例如: 31100812 或 7777777)..." onkeydown="if(event.key==='Enter') parsePatientBarcode()">
                             <button class="btn-primary" onclick="parsePatientBarcode()">解析手環條碼</button>
                         </div>
                         <div id="patient-info-box" class="info-result-card" style="display: none;">
@@ -1358,10 +1358,10 @@
 
                     <!-- Step 3: BT Sensor MAC Scanner -->
                     <div class="sop-step-panel" id="panel-step-3">
-                        <h3>第三步：請掃描 BT 傳輸器二維碼 (MAC Address)</h3>
-                        <p class="step-hint">請對準傳輸器 QR Code 條碼 (自動清除冒號整理為標準 MAC，如 F44EFDB20775)</p>
+                        <h3>第三步：請掃描或鍵盤輸入 BT 傳輸器條碼 (MAC Address)</h3>
+                        <p class="step-hint">支援 USB 掃描槍或直接鍵盤輸入 (例如: MAC F44EFDB20775，輸入 AAAAAAA 開頭為虛擬 BT 測試)</p>
                         <div class="input-with-button">
-                            <input type="text" id="bt-scan-input" placeholder="等待 BT 傳輸器條碼掃描中 (例如 F44E:FD:B2:07:75)..." onkeydown="if(event.key==='Enter') parseBTBarcode()">
+                            <input type="text" id="bt-scan-input" placeholder="掃描或鍵盤輸入 BT 條碼 (例如: F44EFDB20775 或 AAAAAAA00001)..." onkeydown="if(event.key==='Enter') parseBTBarcode()">
                             <button class="btn-primary" onclick="parseBTBarcode()">解析 BT 感測器</button>
                         </div>
                         <div id="bt-info-box" class="info-result-card" style="display: none;">
@@ -2211,27 +2211,39 @@
             document.getElementById('btn-to-step2').disabled = false;
         }
 
-        // Step 2: Parse Patient Wristband Barcode
+        // Step 2: Parse Patient Wristband Barcode (Supports Scanner & Keyboard, 8-digit, 7777777 virtual test)
         function parsePatientBarcode() {
             const input = document.getElementById('patient-scan-input');
             const val = input.value.trim();
             if (!val) {
-                alert('請掃描或輸入病人手環條碼');
+                alert('請掃描或鍵盤輸入病人手環條碼');
                 return;
             }
 
-            // Extract Bed Number & Name
             let bed = "311床";
             let name = "張家豪";
             let chartNo = val;
+            let doctor = "林德明 醫師";
 
-            if (val.includes('-')) {
+            // Check if Virtual Test Patient (starts with 7777777)
+            if (val.startsWith('7777777')) {
+                bed = "777床";
+                name = `🧪 虛擬測試病人 (條碼: ${val})`;
+                chartNo = val;
+                doctor = "測試醫療團隊 (虛擬測試)";
+            } else if (/^\d{8}$/.test(val)) {
+                // 8-digit patient barcode standard format (e.g. 31100812)
+                const bedNum = val.substr(0, 3);
+                bed = `${bedNum}床`;
+                name = `病人 (代碼: ${val})`;
+                chartNo = val;
+            } else if (val.includes('-')) {
                 const parts = val.split('-');
                 bed = parts[0].replace('P', '') + "床";
-                name = "張家豪 (手環: " + val + ")";
-            } else if (val.length > 3) {
+                name = `張家豪 (手環: ${val})`;
+            } else if (val.length >= 3) {
                 bed = val.substr(0, 3) + "床";
-                name = "病人 " + val;
+                name = `病人 (${val})`;
             }
 
             currentPatient = {
@@ -2239,7 +2251,7 @@
                 bed: bed,
                 name: name,
                 chartNo: chartNo,
-                doctor: "林德明 醫師"
+                doctor: doctor
             };
 
             document.getElementById('patient-name-display').textContent = `${currentPatient.bed} - ${currentPatient.name}`;
@@ -2248,34 +2260,62 @@
             document.getElementById('btn-to-step3').disabled = false;
         }
 
-        // Step 3: Parse BT Sensor MAC Barcode
+        // Step 3: Parse BT Sensor MAC Barcode (Supports Scanner & Keyboard, AAAAAAA virtual BT test)
         function parseBTBarcode() {
             const input = document.getElementById('bt-scan-input');
             const val = input.value.trim();
             if (!val) {
-                alert('請掃描或輸入 BT 傳輸器 QR Code');
+                alert('請掃描或鍵盤輸入 BT 傳輸器 QR Code');
                 return;
             }
 
-            // Normalize MAC: strip colons, dashes, spaces, convert to uppercase
             let cleanMac = val.replace(/[^A-Fa-f0-9]/g, '').toUpperCase();
-            if (cleanMac.length < 12) {
-                // Pad if short for demo
-                cleanMac = (cleanMac + "F44EFDB20775").substr(0, 12);
-            } else if (cleanMac.length > 12) {
-                cleanMac = cleanMac.substr(0, 12);
+            let isVirtual = false;
+
+            // Check if Virtual Test BT Sensor (starts with AAAAAAA - 7 A's)
+            if (val.toUpperCase().startsWith('AAAAAAA')) {
+                isVirtual = true;
+                const rawUpper = val.toUpperCase();
+                cleanMac = (rawUpper.replace(/[^A-Z0-9]/g, '') + '000000000000').substr(0, 12);
+            } else {
+                if (cleanMac.length < 12) {
+                    cleanMac = (cleanMac + "F44EFDB20775").substr(0, 12);
+                } else if (cleanMac.length > 12) {
+                    cleanMac = cleanMac.substr(0, 12);
+                }
             }
+
+            const formattedMac = cleanMac.match(/.{1,2}/g).join(':');
 
             currentBtSensor = {
                 rawInput: val,
                 mac: cleanMac,
-                formattedMac: cleanMac.match(/.{1,2}/g).join(':')
+                formattedMac: formattedMac,
+                isVirtual: isVirtual
             };
 
             document.getElementById('bt-mac-display').textContent = `${currentBtSensor.mac} (${currentBtSensor.formattedMac})`;
-            document.getElementById('bt-status-display').textContent = `裝置類型: Poseidon BLE 液位/尿袋感測傳輸器`;
+            document.getElementById('bt-status-display').textContent = isVirtual 
+                ? `🧪 裝置類型: 虛擬藍牙測試感測器 (模擬訊號發射源)`
+                : `裝置類型: Poseidon BLE 液位/尿袋感測傳輸器`;
             document.getElementById('bt-info-box').style.display = 'flex';
             document.getElementById('btn-to-step4').disabled = false;
+
+            // If virtual test BT, auto-register virtual device telemetry in activeDevices so live status shows immediately!
+            if (isVirtual) {
+                activeDevices[cleanMac] = {
+                    name: `[測試] MedFlow-${cleanMac.substr(-4)}`,
+                    mac: cleanMac,
+                    rssi: -58,
+                    stat: 0,
+                    cnt: 88,
+                    batteryLow: false,
+                    sensorAlert: false,
+                    hasFlags: true,
+                    lastSeen: Date.now()
+                };
+                scheduleDevicesGridRender();
+            }
         }
 
         // Step Wizard Navigation
