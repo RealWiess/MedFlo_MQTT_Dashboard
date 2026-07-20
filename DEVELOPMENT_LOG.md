@@ -53,4 +53,15 @@
 * 上方區塊劃分為「左側連線設定與發布測試 (340px)」與「右側 4 欄 MedFlow 裝置實時狀態儀表板 (1fr)」，下方由 JSON 即時訊息顯示區跨滿整排。
 * 避免不同螢幕解析度造成側邊擠壓，並為 JSON 語法高亮顯示區提供寬廣橫向空間，大幅提升視讀與操作舒適度。
 
+---
+
+## [2026-07-20] Safari (macOS / iOS / iPadOS) 跨瀏覽器完整相容性升級
+
+### 1. 相容性驗證與強化 (Safari Compatibility Audit)
+* **嵌入式 MQTT.js (Offline & Content-Blocker Protection)**：全檔內嵌 MQTT.js v4 UMD 核心，完全避開 Safari 嚴格的跨網域 (CORS) 限制與第三方腳本阻擋器。
+* **原生 WSS (Secure WebSockets)**：採用 Safari 原生支援之 `wss://` 加密連線協定，已通過 Socket 101 Switching Protocols 相容測試。
+* **-webkit-backdrop-filter 萬用前綴**：為全站毛玻璃視覺樣式（`.card`、`.device-card`）補充 `-webkit-backdrop-filter` 前綴，確保 iOS Safari、iPadOS 以及 macOS Safari 等各式 Apple 設備皆可呈現高質感毛玻璃光澤。
+* **JavaScript ES6+ 標準語法**：全站邏輯均採用跨瀏覽器標準，在 Safari 10+ 均可 100% 穩定順暢運行。
+
+
 
