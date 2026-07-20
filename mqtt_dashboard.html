@@ -1316,9 +1316,9 @@
                     <!-- Step 1: Nurse Login -->
                     <div class="sop-step-panel active" id="panel-step-1">
                         <h3>第一步：請輸入或掃描護理人員號碼</h3>
-                        <p class="step-hint">支援 USB 掃描槍或直接輸入護理師員編 (例如: N1024, N8888)</p>
+                        <p class="step-hint">支援 USB 掃描槍或直接鍵盤輸入 3 碼護理師員編 (例如: 001 至 007)</p>
                         <div class="input-with-button">
-                            <input type="text" id="nurse-id-input" placeholder="請輸入護理人員代號 (例如: N1024)..." onkeydown="if(event.key==='Enter') verifyNurse()">
+                            <input type="text" id="nurse-id-input" placeholder="請輸入 3 碼護理人員代號 (例如: 001, 002... 007)..." onkeydown="if(event.key==='Enter') verifyNurse()">
                             <button class="btn-primary" onclick="verifyNurse()">驗證人員代號</button>
                         </div>
                         <div id="nurse-info-box" class="info-result-card" style="display: none;">
@@ -2177,26 +2177,37 @@
         let currentBtSensor = null;
         let activeBindings = [];
 
-        // Nurse Database Map
+        // Nurse Database Map (001 ~ 007)
         const nurseDatabase = {
-            "N1024": { name: "陳靜宜 護理師", unit: "7樓一般外科護理站" },
-            "N8888": { name: "王雅芬 護理長", unit: "3樓加護病房 (ICU)" },
-            "N1001": { name: "林姿君 護理師", unit: "5樓內科護理站" },
-            "N5566": { name: "黃志明 護理師", unit: "8樓急診後送病房" }
+            "001": { name: "陳靜宜 護理長", unit: "7樓一般外科護理站" },
+            "002": { name: "林姿君 護理師", unit: "5樓內科護理站" },
+            "003": { name: "王雅芬 護理師", unit: "3樓加護病房 (ICU)" },
+            "004": { name: "張婷婷 護理師", unit: "6樓婦產科護理站" },
+            "005": { name: "黃志明 護理師", unit: "8樓急診後送病房" },
+            "006": { name: "許美玲 護理師", unit: "9樓骨科護理站" },
+            "007": { name: "蔡佳蓉 護理師", unit: "4樓心臟內科護理站" }
         };
 
-        // Step 1: Verify Nurse ID
+        // Step 1: Verify Nurse ID (Supports 3-digit code 001~007, e.g. 1 -> 001, N001 -> 001)
         function verifyNurse() {
             const input = document.getElementById('nurse-id-input');
-            const val = input.value.trim().toUpperCase();
+            let val = input.value.trim().toUpperCase();
             if (!val) {
-                alert('請輸入或掃描護理人員代號');
+                alert('請輸入或掃描護理人員代號 (例如 3 碼 001~007)');
                 return;
             }
 
-            let nurseInfo = nurseDatabase[val];
+            // Standardize 3-digit code (e.g. '1' -> '001', 'N001' -> '001')
+            let code = val.replace(/^N/, '');
+            if (/^\d{1,2}$/.test(code)) {
+                code = code.padStart(3, '0');
+            }
+
+            let nurseInfo = nurseDatabase[code] || nurseDatabase[val];
             if (!nurseInfo) {
                 nurseInfo = { name: `護理人員 (${val})`, unit: "智慧護理推車工作站" };
+            } else {
+                val = code;
             }
 
             currentNurse = {
