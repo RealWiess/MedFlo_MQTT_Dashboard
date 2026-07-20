@@ -84,6 +84,14 @@
      - 確認綁定資訊並建立監測任務，自動啟動 **7 天 (168 小時)** 即時剩餘時間倒數。
      - 具備**護理站已綁定病人動態監測牆**：實時刷新每位病人的剩餘天/時/分/秒、時間進度條與液位狀態，並支援出院解綁與 LocalStorage 資料持久化。
 
+---
 
+## [2026-07-20] 熱修復 (Hotfix)：修正護理安裝 SOP 頁面 DOM ID 匹配問題
 
+### 1. 問題與根因 (Issue & Root Cause Analysis)
+* 點擊「護理安裝 SOP」時，介面下方呈現空白（僅頂部導覽列顯示）。
+* **根因探討**：JavaScript `switchPage('sop')` 在切換至第三頁時會尋找 `id="page-sop"` 之 DOM 節點，而 HTML 標籤原先命名為 `id="page-nursing-sop"`，導致 `getElementById` 回傳 `null` 未套用 `.active` 類別，畫面呈現 `display: none` 盲區。
 
+### 2. 修復與驗證 (Fix & Verification)
+* 將 HTML 第三頁 DOM 節點 ID 更正為 `<div id="page-sop" class="page-view">`。
+* **驗證結果**：點擊「護理安裝 SOP」或由首頁點擊「進入護理安裝流程」，4 步驟安裝精靈（護理師登入、病人手環掃描、BT 二維碼掃描、7天動態監測牆）均能 100% 順暢精準呈現。
