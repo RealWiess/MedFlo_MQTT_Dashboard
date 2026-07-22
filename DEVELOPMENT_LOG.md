@@ -135,3 +135,27 @@
    * 鎖定 **MAC 必須為 `F44EFD...` 或 `A100...`** 或廣播名稱確實為 `MEDFLO-...` 的滴護寶硬體，其餘雜訊一律拒絕。
 5. **卡片自動銷毀門檻調整 (Auto-Prune Timeout)**：
    * 調整過期門檻為 **`3 分鐘` (180 秒)**：0~40秒正常高亮，40秒~3分鐘呈現半透明離線狀態，超過 3 分鐘自動清理銷毀舊卡片。
+
+---
+
+## [2026-07-22] Gateway 外觀工業設計 (40x40x10mm) 與 STEP 3D CAD 模型輸出
+
+### 1. 外觀機構與 3D 建模 (Industrial Design & STEP CAD Generation)
+* 依據極簡網關規格，完成 40mm x 40mm x 10mm 超小型網關外殼工業設計（R5mm 圓角、防滑紋理底座、頂部微雕 LOGO 標籤槽）。
+* 機構僅配備 **1 個 USB Type-C 供電/傳輸埠** 與 **1 根全向天線**。
+* 使用 Python CadQuery 實體 CAD 引擎成功生成並輸出 3D STEP 實體圖檔 [MedFlow_Gateway_Enclosure_40x40x10mm.step](file:///C:/Users/JOHN_WIESS/Desktop/MedFlow_Gateway_Enclosure_40x40x10mm.step) 與渲染圖檔 [MedFlow_Gateway_ID_Design.jpg](file:///C:/Users/JOHN_WIESS/Desktop/MedFlow_Gateway_ID_Design.jpg) 至桌面。
+
+---
+
+## [2026-07-22] NMGW2601 AI 醫療網關 Logo 3D 電路字體「e」與心電圖單彗星動畫影片輸出
+
+### 1. Logo 3D 字體與重構 (NEX MED AI 3D Circuit Logo Refactoring)
+* 重構 `NMGW2601_logo_ai_iot_16bit_072205_dithered.bmp`：將中央 IC 晶片上的圖示替換為**極致大氣且填滿晶片晶圓框的 3D 青色霓虹電路小寫字母「e」**（具備 3D 金屬斜角、暗色內溝槽與霓虹光暈），與 `NEX` / `M` / `D` 完美融為一體。
+* 微調晶片比例與間距，修復並完整呈現在 `M` 字母右筆劃，呈現霸氣且工整和諧的 `NEX MED AI` 品牌視覺。
+
+### 2. 精準心電圖單彗星動態影片 (Single ECG Comet Pulse Animation Video)
+* **逐像素心電圖路徑追蹤 (Exact ECG Path Extraction)**：精確抓出圖檔下半部心電圖 Z 字型起伏波形的最亮中心路徑，並在中央 `AI` 斷層處實現水平平滑橫跨無縫銜接。
+* **流線型彗星光點 (Streamlined Comet Light Dot)**：全圖保持純淨單一彗星光點（純白高亮頭部 + 30 點由粗到細漸層藍綠色流線拖尾）。
+* **2 倍速明快傳輸 (2x Speed Enhancement)**：心電圖傳輸週期優化為 4 秒一次，節奏明快。
+* **Windows 相容編碼**：使用 FFmpeg H.264 (AVC1) 編碼生成 [NMGW2601_Circuit_Signal_Animation.mp4](file:///C:/Users/JOHN_WIESS/Desktop/NMGW2601_Circuit_Signal_Animation.mp4) 與免播放器雙擊即看之動態圖檔 [NMGW2601_Circuit_Signal_Animation.gif](file:///C:/Users/JOHN_WIESS/Desktop/NMGW2601_Circuit_Signal_Animation.gif) 並交付桌面。
+
