@@ -2,14 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MedFlow 監測牆">
-    <meta name="application-name" content="MedFlow 監測牆">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="manifest" href="manifest.json">
-    <title>MedFlow 護理站藍芽動態監測牆</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedFlow MQTT Live Dashboard</title>
     <!-- Google Font: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -177,40 +171,6 @@
             }
         }
 
-        /* Mobile Phone (Android/iPhone) & Tablet Responsive Rules */
-        @media (max-width: 768px) {
-            header {
-                padding: 0.75rem 1rem !important;
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 0.5rem !important;
-            }
-            .logo-container {
-                justify-content: center !important;
-            }
-            header > div:last-child {
-                justify-content: center !important;
-                flex-wrap: wrap !important;
-            }
-            .main-container {
-                padding: 0.75rem !important;
-                gap: 1rem !important;
-            }
-            .devices-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .bindings-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .mode-cards-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .modal-card {
-                width: 94% !important;
-                padding: 1.25rem !important;
-            }
-        }
-
         .section-title-bar {
             display: flex;
             justify-content: space-between;
@@ -284,13 +244,14 @@
 
         .device-card .device-name {
             font-family: 'Outfit', sans-serif;
-            font-size: 0.88rem;
+            font-size: 0.68rem;
             font-weight: 700;
             color: var(--text-main);
-            letter-spacing: -0.2px;
+            letter-spacing: -0.5px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.2;
         }
 
         .device-card .mac-addr {
@@ -312,12 +273,11 @@
             transition: var(--transition);
         }
 
-        .device-card .status-indicator.drip,
-        .device-card .status-indicator.full {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--accent-red);
-            border: 1px solid rgba(239, 68, 68, 0.35);
-            animation: borderPulseRed 1.5s infinite alternate;
+        .device-card .status-indicator.drip {
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            animation: borderPulse 2s infinite;
         }
 
         .device-card .status-indicator.idle {
@@ -330,33 +290,6 @@
             0% { border-color: rgba(6, 182, 212, 0.2); }
             50% { border-color: rgba(6, 182, 212, 0.6); }
             100% { border-color: rgba(6, 182, 212, 0.2); }
-        }
-
-        @keyframes borderPulseRed {
-            0% { border-color: rgba(239, 68, 68, 0.25); box-shadow: 0 0 4px rgba(239, 68, 68, 0.2); }
-            100% { border-color: rgba(239, 68, 68, 0.7); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        }
-
-        /* Critical Red Escalation Alarm Card Styles */
-        .device-card.critical-full,
-        .binding-card.critical-full {
-            background: rgba(220, 38, 38, 0.35) !important;
-            border: 2px solid #ef4444 !important;
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6) !important;
-            animation: cardAlarmPulse 1s infinite alternate !important;
-        }
-
-        @keyframes cardAlarmPulse {
-            0% {
-                background: rgba(220, 38, 38, 0.25) !important;
-                border-color: rgba(239, 68, 68, 0.6) !important;
-                box-shadow: 0 0 12px rgba(239, 68, 68, 0.4) !important;
-            }
-            100% {
-                background: rgba(220, 38, 38, 0.5) !important;
-                border-color: #ff4d4d !important;
-                box-shadow: 0 0 30px rgba(239, 68, 68, 0.85) !important;
-            }
         }
 
         .device-card .droplet-icon {
@@ -1168,9 +1101,9 @@
 <body>
 
     <header>
-        <div class="logo-container">
+        <div class="logo-container" onclick="switchPage('landing')" style="cursor: pointer;" title="點擊返回主選單">
             <span class="logo-title">MedFlow</span>
-            <span class="badge" id="header-page-title">藍牙儀表板</span>
+            <span class="badge" id="header-page-title">MQTT Dashboard</span>
         </div>
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <button class="nav-btn" id="btn-nav-home" onclick="switchPage('landing')" style="display: none;">
@@ -1221,6 +1154,21 @@
         <div class="main-container">
             <!-- Sidebar: Configuration and Publish -->
             <div class="sidebar">
+                <!-- Gateway Source Mode Switcher Bar -->
+                <div class="card" style="padding: 0.85rem 1rem;">
+                    <div class="card-title" style="margin-bottom: 0.6rem; font-size: 0.88rem; color: var(--text-main);">
+                        🌐 選擇 Gateway 資料來源模式
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-mode-real" class="mode-switch-btn real" onclick="setGatewayMode('real')" style="flex:1; padding: 0.65rem 0.4rem; font-weight: bold; border-radius: 8px; border: 1px solid var(--bg-card-border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.8rem;">
+                            📡 實體 Gateway
+                        </button>
+                        <button id="btn-mode-sim" class="mode-switch-btn active sim" onclick="setGatewayMode('sim')" style="flex:1; padding: 0.65rem 0.4rem; font-weight: bold; border-radius: 8px; border: 1px solid var(--accent-green); background: rgba(16,185,129,0.15); color: var(--accent-green); cursor: pointer; font-size: 0.8rem;">
+                            💻 PC 模擬 Gateway
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Connection Configuration -->
                 <div class="card">
                     <div class="card-title">
@@ -1264,7 +1212,7 @@
                     </div>
                     <div class="form-group">
                         <label for="topic">訂閱 Topic</label>
-                        <input type="text" id="topic" value="DCare/d/#">
+                        <input type="text" id="topic" value="DCare/d/pc_sim_gw">
                     </div>
                     <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
                         <button class="btn-primary" id="btn-connect" onclick="toggleConnection()">連接伺服器</button>
@@ -1309,7 +1257,10 @@
             <div class="dashboard-panel">
                 <div class="section-title-bar">
                     <div class="section-title">🏥 滴護寶裝置實時狀態</div>
-                    <div class="device-count-badge" id="device-count-badge">0 個裝置在線</div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <button onclick="clearAllDeviceCards()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold;" title="一鍵清空所有舊的快取卡片">🧹 一鍵清空面板卡片</button>
+                        <div class="device-count-badge" id="device-count-badge">0 個裝置在線</div>
+                    </div>
                 </div>
                 <div class="devices-grid" id="devices-grid">
                     <div class="empty-state">
@@ -1497,165 +1448,6 @@
         let autoScroll = true;
         let connectionState = 'disconnected'; // 'disconnected' | 'connecting' | 'connected'
         let renderDevicesTimer = null;
-
-        // Web Audio API Sound Generator for Urine Bag Full Alarm
-        let audioCtx = null;
-
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    audioCtx = new AudioContext();
-                }
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        // Unlock AudioContext for Mobile Safari (iOS) and Android Chrome on touch
-        ['click', 'touchstart', 'touchend', 'pointerdown'].forEach(evtType => {
-            document.addEventListener(evtType, () => {
-                getAudioContext();
-            }, { once: true });
-        });
-
-        function playDingDongPair(startTime) {
-            const ctx = getAudioContext();
-            if (!ctx) return;
-
-            const osc1 = ctx.createOscillator();
-            const gain1 = ctx.createGain();
-            osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(880, startTime);
-            gain1.gain.setValueAtTime(0, startTime);
-            gain1.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
-            gain1.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
-
-            osc1.connect(gain1);
-            gain1.connect(ctx.destination);
-            osc1.start(startTime);
-            osc1.stop(startTime + 0.35);
-
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
-            const dongStart = startTime + 0.35;
-            osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(659, dongStart);
-            gain2.gain.setValueAtTime(0, dongStart);
-            gain2.gain.linearRampToValueAtTime(0.45, dongStart + 0.02);
-            gain2.gain.exponentialRampToValueAtTime(0.001, dongStart + 0.45);
-
-            osc2.connect(gain2);
-            gain2.connect(ctx.destination);
-            osc2.start(dongStart);
-            osc2.stop(dongStart + 0.45);
-        }
-
-        function playDingDongSequence(count) {
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
-                const now = ctx.currentTime;
-                const pairDuration = 0.85;
-                for (let i = 0; i < count; i++) {
-                    playDingDongPair(now + (i * pairDuration));
-                }
-            } catch (e) {
-                console.error("Audio playback error:", e);
-            }
-        }
-
-        const fullStateTracker = {};
-
-        const ESCALATION_SECONDS = 30; // 30 秒未處理自動升級全紅告警
-
-        function updateFullStateTracking(mac, isFull) {
-            const now = Date.now();
-            if (isFull) {
-                if (!fullStateTracker[mac]) {
-                    fullStateTracker[mac] = {
-                        fullStartTime: now,
-                        initialSoundPlayed: true,
-                        escalatedSoundPlayed: false,
-                        lastSoundTime: now,
-                        isCritical: false
-                    };
-                    console.log(`[Alarm] Device ${mac} urine bag full! Playing 3 Ding-Dong chimes.`);
-                    playDingDongSequence(3);
-                } else {
-                    const tracker = fullStateTracker[mac];
-                    const elapsedSec = Math.floor((now - tracker.fullStartTime) / 1000);
-
-                    if (elapsedSec >= ESCALATION_SECONDS) {
-                        tracker.isCritical = true;
-                        if (!tracker.escalatedSoundPlayed || (now - tracker.lastSoundTime >= 15000)) {
-                            tracker.escalatedSoundPlayed = true;
-                            tracker.lastSoundTime = now;
-                            console.log(`[Alarm Escalation] Device ${mac} full for ${elapsedSec}s! Playing 6 Ding-Dong chimes and turning card RED.`);
-                            playDingDongSequence(6);
-                        }
-                    }
-                }
-            } else {
-                if (fullStateTracker[mac]) {
-                    delete fullStateTracker[mac];
-                }
-            }
-        }
-
-        // Check if MAC belongs to a virtual test device (e.g. starting with AAAAAAA)
-        function isVirtualDevice(mac) {
-            if (!mac) return false;
-            const cleanMac = mac.toUpperCase().replace(/^MEDFLO-/i, '');
-            return cleanMac.startsWith('AAAAAAA');
-        }
-
-        // Toggle or Acknowledge/Reset Device Full/Empty Status
-        function toggleDeviceStatus(mac) {
-            if (!activeDevices[mac]) {
-                activeDevices[mac] = {
-                    mac: mac,
-                    name: 'MedFlo-' + mac.replace(/^MEDFLO-/i, ''),
-                    rssi: -65,
-                    cnt: 0,
-                    stat: 1,
-                    batteryLow: false,
-                    sensorAlert: false,
-                    hasFlags: true,
-                    lastSeen: Date.now()
-                };
-            }
-
-            const dev = activeDevices[mac];
-            
-            // If device is currently in Full/Alert state (stat === 0), clicking ALWAYS clears/acknowledges the alert!
-            if (dev.stat === 0) {
-                dev.stat = 1; // Clear alert -> 尿袋空
-                if (fullStateTracker[mac]) {
-                    delete fullStateTracker[mac];
-                }
-                console.log(`[Alert Handled] Device ${mac} alert acknowledged by user. Reset to 尿袋空.`);
-            } else {
-                // If device is currently Empty (stat === 1), check if allowed to manually trigger full state (test mode)
-                const isTestBinding = activeBindings.some(b => b.btSensor.mac === mac && (b.patient.bed.includes('777') || b.patient.name.includes('虛擬') || b.patient.barcode.startsWith('777')));
-                if (!isVirtualDevice(mac) && !isTestBinding) {
-                    console.warn(`[Security] Device ${mac} is a real hardware sensor. Automatic telemetry updates from gateway will set status.`);
-                    return;
-                }
-                dev.stat = 0; // Trigger full state -> 尿袋滿
-                if (fullStateTracker[mac]) {
-                    delete fullStateTracker[mac];
-                }
-                updateFullStateTracking(mac, true);
-                console.log(`[Test Mode] Device ${mac} status set to 尿袋滿.`);
-            }
-
-            dev.lastSeen = Date.now();
-            renderDevicesGrid();
-            renderActiveBindings();
-        }
 
         // Toggle password visibility
         function togglePassword(inputId) {
@@ -2135,6 +1927,8 @@
             return result;
         }
 
+        let currentGatewayMode = 'sim';
+
         // Process incoming messages to populate activeDevices
         function processDashboardMessage(topic, payloadStr) {
             let logsArray = [];
@@ -2167,6 +1961,14 @@
                 
                 // Extract properties
                 const name = item.name || `MEDFLO-${mac}`;
+                const gwid = item.gwid || item.gateway_id || (topic ? topic.split('/').pop() : 'N/A');
+                const isSimGw = (gwid && gwid.toUpperCase().includes("PC_SIM")) || (topic && topic.includes("pc_sim"));
+
+                // 實體 Gateway 模式：關閉 PC 模擬，拒絕接收所有來自 PC 模擬 Gateway 的遙測數據
+                if (currentGatewayMode === 'real' && isSimGw) {
+                    return;
+                }
+
                 const rssi = parseInt(item.rssi) || -100;
                 const stat = (item.stat !== undefined) ? parseInt(item.stat) : (item.status !== undefined ? parseInt(item.status) : 1);
                 const cnt = (item.cnt !== undefined) ? parseInt(item.cnt) : (item.counter !== undefined ? parseInt(item.counter) : 0);
@@ -2178,6 +1980,8 @@
                 activeDevices[mac] = {
                     mac: mac,
                     name: name,
+                    gwid: gwid,
+                    topic: topic,
                     rssi: rssi,
                     stat: stat,
                     cnt: cnt,
@@ -2210,8 +2014,25 @@
             const grid = document.getElementById('devices-grid');
             const badge = document.getElementById('device-count-badge');
             
-            // Convert to array and sort: online first, then by lastSeen descending
-            const devicesList = Object.values(activeDevices);
+            // 轉為陣列並過濾模式
+            let devicesList = Object.values(activeDevices).filter(dev => {
+                const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
+                if (currentGatewayMode === 'real' && isSimGw) return false;
+                return true;
+            });
+
+            // 排序邏輯：
+            // PC 模擬 Gateway 模式：將 PC 找到的 BT 放在卡片最前面，實體 Gateway 排在後面
+            // 實體 Gateway 模式：依照最新收到時間排序
+            devicesList.sort((a, b) => {
+                if (currentGatewayMode === 'sim') {
+                    const aIsSim = (a.gwid && a.gwid.toUpperCase().includes("PC_SIM")) || (a.topic && a.topic.includes("pc_sim"));
+                    const bIsSim = (b.gwid && b.gwid.toUpperCase().includes("PC_SIM")) || (b.topic && b.topic.includes("pc_sim"));
+                    if (aIsSim && !bIsSim) return -1;
+                    if (!aIsSim && bIsSim) return 1;
+                }
+                return b.lastSeen - a.lastSeen;
+            });
             
             if (devicesList.length === 0) {
                 grid.innerHTML = `
@@ -2228,11 +2049,6 @@
                 return;
             }
 
-            // Sort devices by FIXED MAC Address to guarantee stable position on the grid
-            devicesList.sort((a, b) => {
-                return (a.mac || '').localeCompare(b.mac || '');
-            });
-
             // Count online devices (seen in the last 40 seconds)
             const now = Date.now();
             let onlineCount = 0;
@@ -2240,9 +2056,11 @@
             let html = "";
             devicesList.forEach(dev => {
                 const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
-                const isOffline = secondsAgo > 40; // Broadcast period is 30s
-                dev.offline = isOffline;
-                
+                if (secondsAgo > 180) { // 超過 3 分鐘 (180 秒) 未收到數據才自動清除舊卡片
+                    delete activeDevices[dev.mac];
+                    return;
+                }
+                const isOffline = secondsAgo > 40;
                 if (!isOffline) onlineCount++;
 
                 // RSSI Bars
@@ -2258,24 +2076,23 @@
                     rssiBarsHtml += `<span class="rssi-bar ${isFilled ? 'filled' : ''}"></span>`;
                 }
 
+                // Gateway Source Tag
+                const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
+                const gwTagHtml = isSimGw
+                    ? `<span style="font-size: 0.65rem; color: #10B981; font-weight: 600; background: rgba(16,185,129,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(16,185,129,0.25);">💻 PC模擬: ${dev.gwid || 'pc_sim'}</span>`
+                    : `<span style="font-size: 0.65rem; color: #06B6D4; font-weight: 600; background: rgba(6,182,212,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(6,182,212,0.25);">📡 實體GW: ${dev.gwid || 'GW202601'}</span>`;
+
                 // Drip Status Badge
                 // stat === 0 is Low (尿袋滿/Full), stat === 1 is High (尿袋空/Empty)
                 const isFull = dev.stat === 0;
-                updateFullStateTracking(dev.mac, isFull);
-                const tracker = fullStateTracker[dev.mac];
-                const isCritical = tracker ? tracker.isCritical : false;
-
-                const isVirtual = isVirtualDevice(dev.mac);
-                const clickAttr = isVirtual ? `onclick="toggleDeviceStatus('${dev.mac}')" style="cursor: pointer;" title="虛擬測試裝置：點擊可切換 尿袋滿/尿袋空 狀態"` : '';
-
                 const statusHtml = isFull 
-                    ? `<div class="status-indicator drip full" ${clickAttr}>
-                         <span class="droplet-icon anim">🔴</span>
-                         <span>尿袋滿</span>
+                    ? `<div class="status-indicator drip">
+                         <span class="droplet-icon anim">💧</span>
+                         <span>尿袋滿 (LOW)</span>
                        </div>`
-                    : `<div class="status-indicator idle" ${clickAttr}>
+                    : `<div class="status-indicator idle">
                          <span class="droplet-icon">🟢</span>
-                         <span>尿袋空</span>
+                         <span>尿袋空 (HIGH)</span>
                        </div>`;
 
                 // Battery Badge
@@ -2304,11 +2121,12 @@
                 }
 
                 html += `
-                    <div class="device-card ${isOffline ? 'offline' : ''} ${isCritical ? 'critical-full' : ''}">
+                    <div class="device-card ${isOffline ? 'offline' : ''}">
                         <div class="card-header">
                             <div class="device-name-container">
                                 <span class="device-name">${dev.name}</span>
                                 <span class="mac-addr">${dev.mac.match(/.{1,2}/g).join(':')}</span>
+                                <div style="margin-top: 3px;">${gwTagHtml}</div>
                             </div>
                             <div class="rssi-bar-container" title="RSSI: ${dev.rssi} dBm">
                                 ${rssiBarsHtml}
@@ -2356,6 +2174,65 @@
         }, 2000);
         
         // Clean dashboard data
+        function clearAllDeviceCards() {
+            activeDevices = {};
+            renderDevicesGrid();
+            if (typeof addLogMessage === 'function') {
+                addLogMessage('系統', '已一鍵清空面板上所有的藍牙裝置卡片。');
+            }
+        }
+
+        // Switch Gateway Data Source Mode (Real vs PC Sim)
+        function setGatewayMode(mode) {
+            currentGatewayMode = mode;
+            const btnReal = document.getElementById('btn-mode-real');
+            const btnSim = document.getElementById('btn-mode-sim');
+            const topicInput = document.getElementById('topic');
+            
+            if (mode === 'real') {
+                if (btnReal) {
+                    btnReal.style.borderColor = 'var(--accent-cyan)';
+                    btnReal.style.background = 'rgba(6,182,212,0.15)';
+                    btnReal.style.color = 'var(--accent-cyan)';
+                }
+                if (btnSim) {
+                    btnSim.style.borderColor = 'var(--bg-card-border)';
+                    btnSim.style.background = 'transparent';
+                    btnSim.style.color = 'var(--text-muted)';
+                }
+                if (topicInput) topicInput.value = 'DCare/d/#';
+                
+                // 即時清理記憶體中所有的 PC SIM 裝置卡片
+                Object.keys(activeDevices).forEach(mac => {
+                    const dev = activeDevices[mac];
+                    const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
+                    if (isSimGw) {
+                        delete activeDevices[mac];
+                    }
+                });
+                
+                if (typeof addLogMessage === 'function') addLogMessage('系統', '已切換至【📡 實體 Gateway 模式】：關閉 PC 模擬，只顯示實體 Gateway 掃描之 BT 裝置。');
+            } else if (mode === 'sim') {
+                if (btnReal) {
+                    btnReal.style.borderColor = 'var(--bg-card-border)';
+                    btnReal.style.background = 'transparent';
+                    btnReal.style.color = 'var(--text-muted)';
+                }
+                if (btnSim) {
+                    btnSim.style.borderColor = 'var(--accent-green)';
+                    btnSim.style.background = 'rgba(16,185,129,0.15)';
+                    btnSim.style.color = 'var(--accent-green)';
+                }
+                // 訂閱全頻道 DCare/d/# 以同時接收實體 GW 與 PC 模擬
+                if (topicInput) topicInput.value = 'DCare/d/#';
+                if (typeof addLogMessage === 'function') addLogMessage('系統', '已切換至【💻 PC 模擬 Gateway 模式】：開啟 PC 模擬，同時顯示實體與 PC 找到的 BT，並將 PC 找到的 BT 置頂排序於最前面。');
+            }
+
+            renderDevicesGrid();
+            if (typeof connectMQTT === 'function') {
+                connectMQTT();
+            }
+        }
         const originalClearMessages = clearMessages;
         clearMessages = function() {
             originalClearMessages();
@@ -2366,11 +2243,10 @@
         /* =========================================================
          * 1. Multi-Page SPA Navigation System
          * ========================================================= */
-        let currentPage = sessionStorage.getItem('medflow_current_page') || 'monitor';
+        let currentPage = 'landing';
 
         function switchPage(pageId) {
             currentPage = pageId;
-            sessionStorage.setItem('medflow_current_page', pageId);
             document.querySelectorAll('.page-view').forEach(el => {
                 el.classList.remove('active');
             });
@@ -2395,6 +2271,15 @@
                 btnMonitor.style.display = 'none';
                 btnSop.style.display = 'inline-flex';
                 headerTitle.textContent = '藍牙儀表板';
+
+                // 當切換到藍牙儀表板時，若尚未連線則立刻自動連線
+                if (typeof connectionState !== 'undefined' && connectionState === 'disconnected') {
+                    setTimeout(() => {
+                        if (typeof connectMQTT === 'function') {
+                            connectMQTT();
+                        }
+                    }, 100);
+                }
             } else if (pageId === 'sop') {
                 btnHome.style.display = 'inline-flex';
                 btnMonitor.style.display = 'inline-flex';
@@ -2698,31 +2583,7 @@
             const now = Date.now();
             let html = "";
 
-            // Priority Sort: Critical Full (>=30s) > Full (stat===0) > Normal > Expired
-            const sortedBindings = [...activeBindings].sort((a, b) => {
-                const devA = activeDevices[a.btSensor.mac];
-                const devB = activeDevices[b.btSensor.mac];
-
-                const isFullA = devA && devA.stat === 0 ? 1 : 0;
-                const isFullB = devB && devB.stat === 0 ? 1 : 0;
-
-                const trackerA = fullStateTracker[a.btSensor.mac];
-                const trackerB = fullStateTracker[b.btSensor.mac];
-
-                const isCriticalA = trackerA && trackerA.isCritical ? 2 : 0;
-                const isCriticalB = trackerB && trackerB.isCritical ? 2 : 0;
-
-                const scoreA = isCriticalA + isFullA;
-                const scoreB = isCriticalB + isFullB;
-
-                if (scoreA !== scoreB) {
-                    return scoreB - scoreA;
-                }
-
-                return (b.startTime || 0) - (a.startTime || 0);
-            });
-
-            sortedBindings.forEach(b => {
+            activeBindings.forEach(b => {
                 const remainingMs = Math.max(0, b.endTime - now);
                 const isExpired = remainingMs === 0;
 
@@ -2733,41 +2594,26 @@
 
                 const timeStr = isExpired
                     ? "⚠️ 已到期 (7天完成)"
-                    : `${days}天 ${hours}時 ${minutes}分`;
+                    : `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
 
                 const progressPct = Math.min(100, Math.max(0, (remainingMs / b.durationMs) * 100));
 
                 // Check live BLE status if available
                 const bleDev = activeDevices[b.btSensor.mac];
-                let isCritical = false;
-                let isFull = false;
+                let bleStatusHtml = '<span style="color: var(--text-muted);">廣播連線中...</span>';
                 if (bleDev) {
-                    isFull = bleDev.stat === 0;
-                    updateFullStateTracking(b.btSensor.mac, isFull);
-                    const tracker = fullStateTracker[b.btSensor.mac];
-                    isCritical = tracker ? tracker.isCritical : false;
+                    const isFull = bleDev.stat === 0;
+                    bleStatusHtml = isFull 
+                        ? `<span style="color: var(--accent-cyan); font-weight: bold;">💧 尿袋滿 (LOW)</span>`
+                        : `<span style="color: var(--accent-green); font-weight: bold;">🟢 尿袋空 (HIGH)</span>`;
                 }
 
-                const isVirtual = isVirtualDevice(b.btSensor.mac);
-                const isTestBinding = b.patient.bed.includes('777') || b.patient.name.includes('虛擬') || b.patient.barcode.startsWith('777');
-                const canClick = isVirtual || isTestBinding;
-                const clickAttr = canClick ? `onclick="toggleDeviceStatus('${b.btSensor.mac}')" title="測試裝置：點擊可切換 尿袋滿/尿袋空 狀態"` : '';
-
-                let bleStatusHtml = isFull 
-                    ? `<span ${clickAttr} style="color: var(--accent-red); font-weight: bold; ${canClick ? 'cursor: pointer;' : ''}">🔴 尿袋滿</span>`
-                    : `<span ${clickAttr} style="color: var(--accent-green); font-weight: bold; ${canClick ? 'cursor: pointer;' : ''}">🟢 尿袋空</span>`;
-
-                let rawMac = b.btSensor.mac || '';
-                let macClean = rawMac.replace(/^MEDFLO-/i, '');
-                let macFormatted = 'MedFlo-' + macClean;
-
                 html += `
-                    <div class="binding-card ${isCritical ? 'critical-full' : ''}">
+                    <div class="binding-card">
                         <div class="binding-card-header">
                             <div>
                                 <div class="patient-bed">🏥 ${b.patient.bed} - ${b.patient.name}</div>
-                                <div class="patient-sub">綁定員編: ${b.nurse.name}</div>
-                                <div class="patient-sub" style="font-family: monospace; font-size: 0.8rem; margin-top: 0.15rem; color: var(--accent-cyan); opacity: 0.9;">${macFormatted}</div>
+                                <div class="patient-sub">綁定員編: ${b.nurse.name} | MAC: ${b.btSensor.mac}</div>
                             </div>
                             <button class="btn-small-danger" onclick="unbindPatient('${b.id}')">解綁/完成</button>
                         </div>
@@ -2780,7 +2626,7 @@
                             <span class="timer-badge" title="預計使用 7 天 (168 小時)">
                                 ⏱️ 剩餘: ${timeStr}
                             </span>
-                            <div style="font-size: 1.1rem; font-weight: bold; white-space: nowrap;">
+                            <div style="font-size: 0.82rem;">
                                 ${bleStatusHtml}
                             </div>
                         </div>
@@ -2796,17 +2642,15 @@
         renderActiveBindings();
         setInterval(renderActiveBindings, 1000);
 
-        // Auto-connect to MQTT broker and restore active page on page load
+        // Auto-connect when page finishes loading if on monitor page
         window.addEventListener('DOMContentLoaded', () => {
-            const savedPage = sessionStorage.getItem('medflow_current_page') || 'monitor';
-            switchPage(savedPage);
-
-            setTimeout(() => {
-                if (typeof connectMQTT === 'function') {
-                    console.log("⚡ Auto-connecting to MQTT Broker...");
-                    connectMQTT();
-                }
-            }, 300);
+            if (typeof currentPage !== 'undefined' && currentPage === 'monitor' && typeof connectionState !== 'undefined' && connectionState === 'disconnected') {
+                setTimeout(() => {
+                    if (typeof connectMQTT === 'function') {
+                        connectMQTT();
+                    }
+                }, 300);
+            }
         });
     </script>
 </body>
