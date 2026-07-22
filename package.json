@@ -1,0 +1,38 @@
+{
+  "name": "medflow-dashboard",
+  "version": "1.0.0",
+  "description": "MedFlow 滴護寶智慧醫療藍芽與 MQTT 動態監測牆",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis portable",
+    "build:mac": "electron-builder --mac dmg",
+    "build:all": "electron-builder -mw"
+  },
+  "keywords": ["MedFlow", "MQTT", "BLE", "Healthcare", "Monitoring"],
+  "author": "MedFlow Software Engineering Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  },
+  "build": {
+    "appId": "com.medflow.dashboard",
+    "productName": "MedFlow 監測牆",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "mqtt_dashboard.html",
+      "main.js",
+      "manifest.json"
+    ],
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.medical"
+    }
+  }
+}
