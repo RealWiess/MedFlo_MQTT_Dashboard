@@ -3226,6 +3226,9 @@
         let autoScroll = true;
         let connectionState = 'disconnected'; // 'disconnected' | 'connecting' | 'connected'
         let renderDevicesTimer = null;
+        let autoReconnectEnabled = true;      // 自動重連開關（手動中斷時設為 false）
+        let reconnectAttempts = 0;            // 當前重試次數
+        let reconnectTimer = null;            // 重連計時器 handle
 
         // Toggle password visibility
         function togglePassword(inputId) {
@@ -3277,16 +3280,16 @@
             const btn = document.getElementById('btn-connect');
 
             dot.className = 'status-dot';
-            
+
             if (status === 'connected') {
                 dot.classList.add('connected');
                 text.textContent = '已連線 ' + (message || '');
                 btn.textContent = '中斷連線';
                 btn.className = 'btn-danger';
                 setInputsDisabled(true);
-            } else if (status === 'connecting') {
+            } else if (status === 'connecting' || status === 'reconnecting') {
                 dot.classList.add('connecting');
-                text.textContent = '連線中...';
+                text.textContent = (status === 'reconnecting') ? (message || '自動重連中...') : '連線中...';
                 btn.textContent = '取消連接';
                 btn.className = 'btn-secondary';
                 setInputsDisabled(true);
@@ -3296,6 +3299,36 @@
                 btn.textContent = '連接伺服器';
                 btn.className = 'btn-primary';
                 setInputsDisabled(false);
+            }
+        }
+
+        // 自動重連排程（指數退避：1s → 2s → 4s → ... max 30s）
+        function scheduleReconnect() {
+            if (!autoReconnectEnabled) return;
+            if (reconnectTimer) return;  // 已經有排程，不重複
+
+            const baseDelay = 1000;
+            const maxDelay = 30000;
+            const delay = Math.min(baseDelay * Math.pow(2, reconnectAttempts), maxDelay);
+            reconnectAttempts++;
+
+            console.log(`Auto-reconnect attempt #${reconnectAttempts} in ${delay}ms`);
+            addLogMessage('系統', `MQTT 已斷線，將在 ${(delay / 1000).toFixed(1)} 秒後自動重連 (第 ${reconnectAttempts} 次)...`);
+
+            updateStatusUI('reconnecting', `第 ${reconnectAttempts} 次重試 (${(delay / 1000).toFixed(1)}s)`);
+
+            reconnectTimer = setTimeout(() => {
+                reconnectTimer = null;
+                if (!autoReconnectEnabled) return;
+                connectMQTT();
+            }, delay);
+        }
+
+        // 取消排程中的重連
+        function cancelReconnect() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
             }
         }
 
@@ -3350,6 +3383,8 @@
                 return;
             }
 
+            cancelReconnect();
+            autoReconnectEnabled = true;  // 使用者主動連線：啟用自動重連
             cleanupClient();
 
             const path = rawPath ? (rawPath.startsWith('/') ? rawPath : '/' + rawPath) : '';
@@ -3375,11 +3410,11 @@
                 client = mqtt.connect(url, options);
 
                 client.on('connect', () => {
-                    if (connectionState !== 'connecting') return;
+                    if (connectionState !== 'connecting' && connectionState !== 'reconnecting') return;
                     console.log('MQTT Connected successfully.');
                     updateStatusUI('connected', host);
                     hideOfflineBanner();
-                    
+
                     client.subscribe(topic, (err) => {
                         if (err) {
                             console.error('Subscription error:', err);
@@ -3401,16 +3436,16 @@
                     if (connectionState === 'disconnected') return;
                     console.log('MQTT Connection closed.');
                     cleanupClient();
-                    updateStatusUI('disconnected', '連接已關閉');
-                    showOfflineBanner('MQTT 連線已關閉，請確認伺服器協定(ws/wss)與 Port 是否相符。');
+                    showOfflineBanner('MQTT 連線已關閉，正在嘗試自動重連...');
+                    scheduleReconnect();
                 });
 
                 client.on('offline', () => {
                     if (connectionState === 'disconnected') return;
                     console.warn('MQTT client is offline (no connection).');
                     cleanupClient();
-                    updateStatusUI('disconnected', '無法連上伺服器');
-                    showOfflineBanner('無法連上 MQTT 伺服器，請確認主機位址、連接埠 (ws://8083) 與網路狀態。');
+                    showOfflineBanner('無法連上 MQTT 伺服器，正在嘗試自動重連...');
+                    scheduleReconnect();
                 });
 
                 client.on('error', (err) => {
@@ -3418,9 +3453,9 @@
                     console.error('MQTT Error:', err);
                     const errMsg = err ? (err.message || '連線錯誤') : '連線錯誤';
                     cleanupClient();
-                    updateStatusUI('disconnected', errMsg);
                     showOfflineBanner(`連線失敗：${errMsg}`);
                     addLogMessage('連線錯誤', `${errMsg} — 若使用 mqtt.go6.tw 請選擇 ws:// 與 Port 8083。`, true);
+                    scheduleReconnect();
                 });
 
             } catch (err) {
@@ -3432,6 +3467,9 @@
         }
 
         function disconnectMQTT() {
+            autoReconnectEnabled = false;  // 手動中斷：關閉自動重連
+            cancelReconnect();
+            reconnectAttempts = 0;
             addLogMessage('系統', '正在中斷連線...');
             cleanupClient();
             updateStatusUI('disconnected', '手動中斷');
