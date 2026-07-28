@@ -1,10 +1,119 @@
 import os
 import sys
 import socket
+import json
+import time
+import threading
+import asyncio
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='ignore')
+    except Exception:
+        pass
+
 PORT = 8080
+
+# Cache for PC local BLE devices scanned by BleakScanner
+local_ble_cache = {}
+
+def start_ble_scanner_background():
+    """Start background BleakScanner thread to scan local BLE devices via PC Bluetooth adapter"""
+    def _run_scanner():
+        try:
+            from bleak import BleakScanner
+        except ImportError:
+            print("[BLE Server Engine] Warning: bleak package not found. Local Bluetooth scanning disabled.")
+            return
+
+        print("📡 [BLE Server Engine] 啟動本機電腦 Bluetooth 硬體掃描引擎 (Bleak)...")
+
+        async def _async_scan():
+            def detection_callback(device, advertisement_data):
+                try:
+                    mac = device.address.replace(':', '').upper()
+                    name_raw = advertisement_data.local_name or device.name or ""
+                    name = name_raw.upper()
+
+                    is_medflo = name.startswith("MEDFLO-") or mac.startswith("F44EFD") or mac.startswith("A100")
+                    is_gateway = name.startswith("NMGW2601-") or name.startswith("GW-")
+                    
+                    mfg_dict = advertisement_data.manufacturer_data or {}
+                    has_shared_mfg = 0xFFFF in mfg_dict
+
+                    if not is_medflo and not is_gateway and not has_shared_mfg:
+                        return
+
+                    if not name_raw:
+                        name_raw = f"NMGW2601-{mac}" if is_gateway else f"MEDFLO-{mac}"
+
+                    mfg_hex = ""
+                    if has_shared_mfg:
+                        payload = mfg_dict[0xFFFF]
+                        mfg_hex = " ".join(f"{b:02X}" for b in payload)
+                    elif mfg_dict:
+                        for cid, val in mfg_dict.items():
+                            mfg_hex += f"{cid:04X} " + " ".join(f"{b:02X}" for b in val)
+
+                    gpio18_stat = "LOW"
+                    battery_low = False
+                    sensor_alert = False
+                    wake_counter = None
+
+                    if has_shared_mfg:
+                        payload = mfg_dict[0xFFFF]
+                        if len(payload) == 2:
+                            gpio18_stat = "HIGH" if payload[0] == 1 else "LOW"
+                            flags = payload[1]
+                            battery_low = bool(flags & 0x01)
+                            sensor_alert = bool(flags & 0x02)
+                        elif len(payload) >= 4:
+                            wake_counter = payload[0] | (payload[1] << 8)
+                        elif len(payload) >= 1:
+                            gpio18_stat = "HIGH" if payload[0] == 1 else "LOW"
+
+                    prev_dev = local_ble_cache.get(mac, {})
+                    new_rssi = advertisement_data.rssi
+                    if new_rssi is not None and -110 < new_rssi <= 0:
+                        rssi_val = new_rssi
+                    else:
+                        rssi_val = prev_dev.get("rssi", -70)
+
+                    local_ble_cache[mac] = {
+                        "mac": mac,
+                        "name": name_raw,
+                        "rssi": rssi_val,
+                        "stat": 0 if gpio18_stat == "HIGH" else 1,
+                        "gpio18": gpio18_stat,
+                        "wakeCycleCounter": wake_counter if wake_counter is not None else prev_dev.get("wakeCycleCounter", None),
+                        "mfg_hex": mfg_hex or prev_dev.get("mfg_hex", ""),
+                        "raw_hex": mfg_hex or prev_dev.get("raw_hex", ""),
+                        "batteryLow": battery_low or prev_dev.get("batteryLow", False),
+                        "sensorAlert": sensor_alert or prev_dev.get("sensorAlert", False),
+                        "isGateway": is_gateway,
+                        "lastSeen": time.time()
+                    }
+                except Exception:
+                    pass
+
+            try:
+                async with BleakScanner(detection_callback) as scanner:
+                    while True:
+                        await asyncio.sleep(0.5)
+            except Exception as ex:
+                print(f"[BLE Server Engine] BleakScanner error: {ex}")
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(_async_scan())
+        except Exception as e:
+            print(f"[BLE Server Engine] Event loop ended: {e}")
+
+    t = threading.Thread(target=_run_scanner, daemon=True)
+    t.start()
 
 def get_local_ip():
     try:
@@ -14,16 +123,394 @@ def get_local_ip():
         s.close()
         return ip
     except Exception:
-        return '127.0.0.1'
+        return "127.0.0.1"
+class ServerSerialManager:
+    """Serial port manager in server backend"""
+    def __init__(self):
+        self.port = None
+        self.baudrate = 115200
+        self.serial_port = None
+        self.is_connected = False
+        self.running = False
+        self.receive_thread = None
+        self.status_thread = None
+        self.total_bytes = 0
+        self.total_lines = 0
+        self.last_receive_time = None
+        self._bytes_window = 0
+        self.recent_lines = []
+        self.status_data = {
+            "wifi_connected": False,
+            "ssid": "-",
+            "ip": "-",
+            "ble_count": "-",
+            "gw_time": "-"
+        }
+
+    def scan_ports(self):
+        try:
+            import serial.tools.list_ports
+            ports = serial.tools.list_ports.comports()
+            return [p.device for p in ports]
+        except Exception as e:
+            print(f"[Serial Manager] Scan ports error: {e}")
+            return []
+
+    def connect(self, port, baudrate=115200):
+        # Always clean up any existing connection first
+        self.disconnect()
+
+        import serial
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                self.serial_port = serial.Serial(
+                    port=port,
+                    baudrate=baudrate,
+                    bytesize=serial.EIGHTBITS,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE,
+                    timeout=0.1
+                )
+                self.port = port
+                self.baudrate = baudrate
+                self.is_connected = True
+                self.running = True
+                self.total_bytes = 0
+                self.total_lines = 0
+                self.status_data = {
+                    "wifi_connected": False,
+                    "ssid": "-",
+                    "ip": "-",
+                    "mac": "-",
+                    "rssi": "-",
+                    "ble_count": "-",
+                    "gw_time": "-",
+                    "fw_ver": "-",
+                    "target_url": "-"
+                }
+                self.receive_thread = threading.Thread(target=self._receive_loop, daemon=True)
+                self.receive_thread.start()
+
+                # Background status polling thread like original app.py
+                self.status_thread = threading.Thread(target=self._status_polling_loop, daemon=True)
+                self.status_thread.start()
+
+                # Immediate time sync & status request
+                sync_time = time.strftime("%Y-%m-%dT%H:%M:%S")
+                self.send_command(f"SET_TIME:{sync_time}")
+                self.send_command("GET_STATUS")
+                self.send_command("$STATUS")
+                return True, f"成功連線至 {port} @ {baudrate} bps"
+            except Exception as e:
+                self.is_connected = False
+                if attempt < max_retries - 1:
+                    # Clean up and wait 0.3s for Windows OS handle release
+                    self.disconnect()
+                    time.sleep(0.3)
+                else:
+                    err_msg = str(e)
+                    if "PermissionError" in err_msg or "存取被拒" in err_msg:
+                        err_msg = f"{port} 埠口已被 Windows 系統或其他軟體 (如 Putty/串口終端) 佔用。請先關閉其他開啟 {port} 的程式後再試。"
+                    return False, f"連線失敗: {err_msg}"
+
+    def _status_polling_loop(self):
+        """Periodically request GET_STATUS & GET_LOGS like original app.py"""
+        while self.running and self.is_connected:
+            try:
+                self.send_command("GET_STATUS")
+                time.sleep(1.0)
+                self.send_command("GET_LOGS")
+                time.sleep(1.0)
+            except Exception:
+                break
+
+    def disconnect(self):
+        self.running = False
+        self.is_connected = False
+        if self.serial_port:
+            try:
+                self.serial_port.close()
+            except Exception:
+                pass
+            self.serial_port = None
+        self.port = None
+        time.sleep(0.2)
+
+    def send_command(self, cmd_str):
+        if self.is_connected and self.serial_port:
+            try:
+                if cmd_str.startswith("SET_WIFI:"):
+                    parts = cmd_str[9:].split(",")
+                    if parts and parts[0].strip():
+                        new_ssid = parts[0].strip()
+                        self.status_data["ssid"] = new_ssid
+                        self.status_data["uart_real_ssid"] = new_ssid
+                elif cmd_str.startswith("SET_WIFI2:"):
+                    parts = cmd_str[10:].split(",")
+                    if parts and parts[0].strip():
+                        new_ssid = parts[0].strip()
+                        self.status_data["ssid"] = new_ssid
+                        self.status_data["uart_real_ssid"] = new_ssid
+
+                self.serial_port.write((cmd_str + "\n").encode('utf-8'))
+                return True
+            except Exception as e:
+                print(f"[Serial Manager] Send command error: {e}")
+                return False
+        return False
+
+    def _receive_loop(self):
+        buffer = ""
+        while self.running and self.is_connected:
+            try:
+                if self.serial_port and self.serial_port.in_waiting > 0:
+                    data = self.serial_port.read(self.serial_port.in_waiting).decode('utf-8', errors='ignore')
+                    self.total_bytes += len(data)
+                    self._bytes_window += len(data)
+                    self.last_receive_time = time.time()
+                    buffer += data
+
+                    while '\n' in buffer:
+                        line, buffer = buffer.split('\n', 1)
+                        line = line.strip()
+                        if line:
+                            self.total_lines += 1
+                            self.recent_lines.append(line)
+                            if len(self.recent_lines) > 200:
+                                self.recent_lines.pop(0)
+                            self._parse_serial_line(line)
+                else:
+                    time.sleep(0.01)
+            except Exception as e:
+                import traceback
+                print(f"[Serial Manager] Receive loop error: {e}")
+                traceback.print_exc()
+                self.is_connected = False
+                self.running = False
+                break
+
+    def _parse_serial_line(self, line):
+        try:
+            # Match MedFlo_PC_App_20260707 reference implementation:
+            # Parse JSON STATUS packets directly from USB serial stream
+            start = line.find('{')
+            end = line.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                json_str = line[start:end+1]
+                data = json.loads(json_str)
+                
+                cmd = data.get("cmd", "")
+                if cmd == "STATUS" or "wifi_ssid" in data or "ip" in data:
+                    is_conn = bool(data.get("wifi_connected", False))
+                    ip_val = str(data.get("ip", ""))
+                    if ip_val and ip_val not in ("0.0.0.0", "-"):
+                        is_conn = True
+
+                    self.status_data["wifi_connected"] = is_conn
+                    self.status_data["ssid"] = data.get("wifi_ssid", data.get("ssid", "-"))
+                    self.status_data["ip"] = ip_val if ip_val else "-"
+                    self.status_data["mac"] = data.get("mac", self.status_data.get("mac", "-"))
+                    
+                    gw_time = data.get("time")
+                    if gw_time:
+                        self.status_data["gw_time"] = gw_time
+                        if (gw_time.startswith("2012") or gw_time.startswith("1970")) and self.is_connected:
+                            now_str = time.strftime("%Y-%m-%dT%H:%M:%S")
+                            self.send_command(f"SET_TIME:{now_str}")
+
+                    if "target_url" in data: self.status_data["target_url"] = data["target_url"]
+                    if "fw_ver" in data: self.status_data["fw_ver"] = data["fw_ver"]
+                    if "log_count" in data: self.status_data["ble_count"] = data["log_count"]
+                    if "buf_usage" in data: self.status_data["buf_usage"] = data["buf_usage"]
+                    if "ble_disc_passed" in data: self.status_data["ble_disc_passed"] = data["ble_disc_passed"]
+                    if "ble_disc_total" in data: self.status_data["ble_disc_total"] = data["ble_disc_total"]
+
+        except Exception:
+            pass
+
+        except Exception:
+            pass
+
+server_serial_mgr = ServerSerialManager()
 
 class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.path == '/api/serial_ports':
+            self.handle_get_serial_ports()
+            return
+        if self.path == '/api/serial_status':
+            self.handle_get_serial_status()
+            return
+        if self.path == '/api/launch_pc_app':
+            self.handle_launch_pc_app()
+            return
+        if self.path == '/api/pc_app_info':
+            self.handle_get_pc_app_info()
+            return
+        if self.path == '/api/ble_devices':
+            self.handle_get_ble_devices()
+            return
         if self.path == '/' or self.path == '':
             self.path = '/mqtt_dashboard.html'
         return super().do_GET()
+    def do_OPTIONS(self):
+        self.send_response(200, "ok")
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+    def do_POST(self):
+        if self.path == '/api/serial_connect':
+            self.handle_post_serial_connect()
+            return
+        if self.path == '/api/serial_disconnect':
+            self.handle_post_serial_disconnect()
+            return
+        if self.path == '/api/serial_send':
+            self.handle_post_serial_send()
+            return
+        if self.path == '/api/launch_pc_app':
+            self.handle_launch_pc_app()
+            return
+        self.send_error(404, "Endpoint not found")
+
+    def handle_get_serial_ports(self):
+        ports = server_serial_mgr.scan_ports()
+        body = json.dumps({"ports": ports}, ensure_ascii=False).encode('utf-8')
+        self._send_json_response(200, body)
+
+    def handle_get_serial_status(self):
+        res = {
+            "is_connected": server_serial_mgr.is_connected,
+            "port": server_serial_mgr.port,
+            "baudrate": server_serial_mgr.baudrate,
+            "status": server_serial_mgr.status_data,
+            "bytes": server_serial_mgr.total_bytes,
+            "lines": server_serial_mgr.total_lines,
+            "recent_lines": list(server_serial_mgr.recent_lines)
+        }
+        body = json.dumps(res, ensure_ascii=False).encode('utf-8')
+        self._send_json_response(200, body)
+
+    def handle_post_serial_connect(self):
+        length = int(self.headers.get('Content-Length', 0))
+        data_bytes = self.rfile.read(length) if length > 0 else b'{}'
+        try:
+            req = json.loads(data_bytes.decode('utf-8'))
+            port = req.get("port", "COM5")
+            baudrate = int(req.get("baudrate", 115200))
+            ok, msg = server_serial_mgr.connect(port, baudrate)
+            code = 200 if ok else 400
+            resp = {"success": ok, "message": msg, "port": port}
+        except Exception as e:
+            code = 500
+            resp = {"success": False, "message": str(e)}
+        self._send_json_response(code, json.dumps(resp, ensure_ascii=False).encode('utf-8'))
+
+    def handle_post_serial_disconnect(self):
+        server_serial_mgr.disconnect()
+        self._send_json_response(200, json.dumps({"success": True, "message": "已成功斷開串口連線"}, ensure_ascii=False).encode('utf-8'))
+
+    def handle_post_serial_send(self):
+        length = int(self.headers.get('Content-Length', 0))
+        data_bytes = self.rfile.read(length) if length > 0 else b'{}'
+        try:
+            req = json.loads(data_bytes.decode('utf-8'))
+            command = req.get("command", "")
+            ok = server_serial_mgr.send_command(command)
+            code = 200 if ok else 400
+            resp = {"success": ok, "command": command}
+        except Exception as e:
+            code = 500
+            resp = {"success": False, "message": str(e)}
+        self._send_json_response(code, json.dumps(resp, ensure_ascii=False).encode('utf-8'))
+
+    def _send_json_response(self, code, body):
+        try:
+            self.send_response(code)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionError, BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+    def handle_get_ble_devices(self):
+        now = time.time()
+        active_list = []
+        for mac, dev in list(local_ble_cache.items()):
+            if now - dev.get("lastSeen", 0) <= 60:
+                active_list.append(dev)
+        
+        body = json.dumps(active_list, ensure_ascii=False).encode('utf-8')
+        self._send_json_response(200, body)
+
+    def find_pc_app_path(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(base_dir)
+        candidates = [
+            os.path.join(parent_dir, 'MedFlo_PC_App_20260707'), # C:\SW code\source code\MedFlo_PC_App_20260707
+            os.path.join(base_dir, 'MedFlo_PC_App_20260707'),   # C:\SW code\source code\MefFlo_MQTT_Dashbaord\MedFlo_PC_App_20260707
+            r"C:\SW code\source code\MedFlo_PC_App_20260707",
+            r"C:\SW code\source code\MefFlo_MQTT_Dashbaord\MedFlo_PC_App_20260707"
+        ]
+        for cand in candidates:
+            bat = os.path.join(cand, 'run.bat')
+            if os.path.exists(bat):
+                return cand, bat
+        return candidates[0], os.path.join(candidates[0], 'run.bat')
+
+    def handle_get_pc_app_info(self):
+        cand_dir, cand_bat = self.find_pc_app_path()
+        exists = os.path.exists(cand_bat)
+        resp = {
+            "exists": exists,
+            "app_dir": cand_dir,
+            "bat_path": cand_bat
+        }
+        body = json.dumps(resp, ensure_ascii=False).encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def handle_launch_pc_app(self):
+        import subprocess
+        app_dir, bat_path = self.find_pc_app_path()
+        
+        try:
+            if os.path.exists(bat_path):
+                subprocess.Popen(['cmd.exe', '/c', 'start', 'run.bat'], cwd=app_dir, shell=True)
+                resp = {
+                    "status": "ok",
+                    "message": f"已成功從路徑 [{app_dir}] 調用系統啟動 MedFlo PC App (run.bat)！",
+                    "app_dir": app_dir,
+                    "bat_path": bat_path
+                }
+                code = 200
+            else:
+                resp = {"status": "error", "message": f"找不到啟動檔: {bat_path}"}
+                code = 404
+        except Exception as e:
+            resp = {"status": "error", "message": f"啟動失敗: {str(e)}"}
+            code = 500
+
+        body = json.dumps(resp, ensure_ascii=False).encode('utf-8')
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    start_ble_scanner_background()
     local_ip = get_local_ip()
     url = f"http://{local_ip}:{PORT}/mqtt_dashboard.html"
     

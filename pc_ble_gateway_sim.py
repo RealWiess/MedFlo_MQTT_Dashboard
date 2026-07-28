@@ -61,16 +61,22 @@ def parse_medflow_data(device, adv_data):
     raw_hex = ""
     stat = 0 # Default 0
     bat_low = False
+    sensor_alert = False
+    wake_counter = None
     
     if adv_data.manufacturer_data:
         for mfg_id, data_bytes in adv_data.manufacturer_data.items():
             hex_str = data_bytes.hex().upper()
             raw_hex += f"{mfg_id:04X}{hex_str}"
-            if len(data_bytes) >= 2:
-                last_byte = data_bytes[-1]
-                stat = 0 if (last_byte & 0x01) == 0 else 1
-                bat_low = ((last_byte & 0x02) != 0)
-    
+            if mfg_id == 0xFFFF:
+                if len(data_bytes) == 2:
+                    stat = 0 if data_bytes[0] == 1 else 1
+                    flags = data_bytes[1]
+                    bat_low = bool(flags & 0x01)
+                    sensor_alert = bool(flags & 0x02)
+                elif len(data_bytes) >= 4:
+                    wake_counter = data_bytes[0] | (data_bytes[1] << 8)
+
     if not raw_hex:
         name_hex = display_name.encode("utf-8").hex().upper()
         raw_hex = f"0201061409{name_hex}05FFFFFF0000"
@@ -84,10 +90,12 @@ def parse_medflow_data(device, adv_data):
         "rssi": rssi,
         "stat": stat,
         "cnt": device_counters[mac],
+        "wake_cycle": wake_counter,
         "mac": mac,
         "name": display_name,
         "data": raw_hex,
         "batteryLow": bat_low,
+        "sensorAlert": sensor_alert,
         "lastSeen": time.time()
     }
 
