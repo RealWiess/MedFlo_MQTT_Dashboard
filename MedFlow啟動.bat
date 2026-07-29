@@ -2,8 +2,8 @@
 setlocal
 cd /d "%~dp0"
 
-:: --- 1. Kill any old server holding the port ---
-taskkill /f /im python.exe >nul 2>&1
+:: --- 1. Kill only the process holding port 8080 (not the scanner) ---
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8080.*LISTENING" 2^>nul') do taskkill /f /pid %%a >nul 2>&1
 ping 127.0.0.1 -n 2 >nul
 
 :: --- 2. Start server.py in a separate background window ---
