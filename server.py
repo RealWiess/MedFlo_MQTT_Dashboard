@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import socket
@@ -508,15 +509,20 @@ class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-def main():
+def main(enable_ble=True):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    start_ble_scanner_background()
+    if enable_ble:
+        start_ble_scanner_background()
+        ble_status = "🔵 BLE 本機掃描: 已啟用"
+    else:
+        ble_status = "⚪ BLE 本機掃描: 已停用 (--no-ble)"
     local_ip = get_local_ip()
     url = f"http://{local_ip}:{PORT}/mqtt_dashboard.html"
-    
+
     print("=" * 65)
     print("🏥 MedFlow 滴護寶藍芽動態監測牆 - 全平台一鍵開啟服務已啟動")
     print("=" * 65)
+    print(f"   {ble_status}")
     print(f"💻 本機電腦 (Windows / Mac) 雙擊即開:  http://localhost:{PORT}")
     print(f"📱 移動裝置 (Android / iPhone / iPad) 掃碼連線:")
     print(f"👉 網址: 【 {url} 】")
@@ -539,4 +545,7 @@ def main():
         sys.exit(0)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='MedFlow MQTT Dashboard Server')
+    parser.add_argument('--no-ble', action='store_true', help='停用本機 BLE 藍牙背景掃描（避免與 MedFlo_scanner 等桌面工具搶佔藍牙適配器）')
+    args = parser.parse_args()
+    main(enable_ble=not args.no_ble)

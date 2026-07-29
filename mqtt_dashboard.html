@@ -3975,11 +3975,15 @@
 
                 let dev = activeDevices[mac];
                 if (!dev) {
+                    // 第一次發現的新裝置：上線時間用實際首次發現時間
+                    const d = new Date(nowMs);
+                    const timeStr = (pktLogTimeStr && pktLogTimeStr.includes('/')) ? pktLogTimeStr
+                        : `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                     dev = {
                         mac: mac,
                         name: name,
-                        firstSeenMs: DEFAULT_FORCED_ONLINE_MS,
-                        firstSeenTimeStr: DEFAULT_FORCED_ONLINE_STR,
+                        firstSeenMs: nowMs,
+                        firstSeenTimeStr: timeStr,
                         lastSeenMs: nowMs,
                         totalPackets: 0,
                         gateways: {},
@@ -3989,15 +3993,20 @@
                     activeDevices[mac] = dev;
                 } else {
                     if (!dev.firstSeenMs) {
-                        dev.firstSeenMs = DEFAULT_FORCED_ONLINE_MS;
-                        dev.firstSeenTimeStr = DEFAULT_FORCED_ONLINE_STR;
+                        const d = new Date(nowMs);
+                        const timeStr = (pktLogTimeStr && pktLogTimeStr.includes('/')) ? pktLogTimeStr
+                            : `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        dev.firstSeenMs = nowMs;
+                        dev.firstSeenTimeStr = timeStr;
                     }
                     const timeSinceLastMsg = nowMs - (dev.lastSeenMs || nowMs);
                     const totalLifetime = nowMs - (dev.firstSeenMs || nowMs);
                     // Continuous Stream Rule: 間隔 > 10 分鐘 (600,000 ms) 或滿 168 小時 (604,800,000 ms) -> 視同服務終止，重置週期！
                     if (timeSinceLastMsg > 10 * 60 * 1000 || totalLifetime > 168 * 3600 * 1000) {
+                        const dReset = new Date(nowMs);
+                        const resetTimeStr = `${dReset.getMonth()+1}/${dReset.getDate()} ${String(dReset.getHours()).padStart(2,'0')}:${String(dReset.getMinutes()).padStart(2,'0')}`;
                         dev.firstSeenMs = nowMs;
-                        dev.firstSeenTimeStr = pktLogTimeStr;
+                        dev.firstSeenTimeStr = resetTimeStr;
                         dev.totalPackets = 0;
                         dev.recentStatHistory = [];
                         dev.confirmedState = -1;
@@ -4123,12 +4132,12 @@
 
         // Throttled render function to prevent DOM thrashing and window freeze
         function scheduleDevicesGridRender() {
-            saveActiveDevices();
             if (renderDevicesTimer) return;
             renderDevicesTimer = setTimeout(() => {
                 renderDevicesTimer = null;
+                saveActiveDevices();
                 renderDevicesGrid();
-            }, 100); // 100ms throttle (max 10 DOM redraws per sec)
+            }, 100); // 100ms throttle (max 10 localStorage writes + DOM redraws per sec)
         }
 
         // Render device cards into the center panel grid
