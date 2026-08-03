@@ -2411,7 +2411,6 @@
                             <th>RSSI 訊號強度</th>
                             <th>GPIO18 (液位/觸發)</th>
                             <th>Wake Cycle (喚醒週期)</th>
-                            <th>Sensor (狀態)</th>
                             <th>Packets (封包)</th>
                             <th>Last Seen (更新)</th>
                             <th style="text-align: right;">操作</th>
@@ -5294,6 +5293,12 @@
         let currentPage = 'landing';
 
         function switchPage(pageId) {
+            // Disable BLE scanner when leaving the scanner page
+            if (currentPage === 'scanner' && pageId !== 'scanner') {
+                fetch(getApiUrl('/api/ble_control?enable=0')).catch(() => {});
+                isScannerPaused = true;
+                scannerDevices = {};
+            }
             currentPage = pageId;
             try {
                 sessionStorage.setItem('medflow_current_page', pageId);
@@ -5352,6 +5357,9 @@
                 // Scanner is MQTT-independent — hide MQTT status panel
                 const mqttPanel = document.getElementById('connection-status-panel');
                 if (mqttPanel) mqttPanel.style.display = 'none';
+                // Enable backend BLE scanner
+                fetch(getApiUrl('/api/ble_control?enable=1')).catch(() => {});
+                isScannerPaused = false;
                 renderScannerTable();
                 setTimeout(() => checkLocalBtServerStatus(), 200);
             } else if (pageId === 'pcapp') {
@@ -5786,9 +5794,9 @@
             let name = devData.name || "";
             const nameUpper = name.toUpperCase();
 
-            // Only accept MFL- / MFS- (BT v4) and NMGW2601- gateway — drop everything else
-            const isMfl = nameUpper.startsWith("MFL-");
-            const isMfs = nameUpper.startsWith("MFS-");
+            // Strict: MFL-/MFS- + 12 hex MAC chars (e.g. MFL-A1B2C3D4E5F6, 16 chars total)
+            const isMfl = name.length === 16 && nameUpper.startsWith("MFL-") && /^[0-9A-F]{12}$/.test(nameUpper.slice(4));
+            const isMfs = name.length === 16 && nameUpper.startsWith("MFS-") && /^[0-9A-F]{12}$/.test(nameUpper.slice(4));
             if (!isMfl && !isMfs && !isGateway) return;
 
             // Parse flags & status
@@ -6124,13 +6132,6 @@
                         ? `<div style="font-family: monospace; font-size: 0.8rem; font-weight: bold; color: var(--accent-cyan);">${dev.wakeCycleCounter} 次 <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(~${formatCounterUptime(counterSec)})</span> ${is7Days ? '<span style="color:#fbbf24; font-weight:bold;">(滿7天)</span>' : ''}</div>`
                         : `<span style="color: var(--text-muted); font-family: monospace;">-</span>`;
 
-                    let sensorBadge = `<span class="badge-status badge-ok">正常</span>`;
-                    if (dev.sensorAlert) {
-                        sensorBadge = `<span class="badge-status badge-danger">🚨 感測異常</span>`;
-                    } else if (is7Days) {
-                        sensorBadge = `<span class="badge-status badge-warn" style="color:#fbbf24;">ℹ️ 滿7天建議換藥</span>`;
-                    }
-
                     const isAlertRow = dev.sensorAlert;
 
                     html += `
@@ -6147,7 +6148,6 @@
                             </td>
                             <td>${gpioBadge}</td>
                             <td>${wakeCycleBadge}</td>
-                            <td>${sensorBadge}</td>
                             <td style="font-family: 'Fira Code', monospace; text-align: center;">${dev.packets}</td>
                             <td>${lastSeenCell}</td>
                             <td style="text-align: right;">
@@ -7479,7 +7479,7 @@
 
         // Poll local PC BLE devices from server.py (BleakScanner background engine)
         function pollLocalBleDevices() {
-            if (isScannerPaused) return;
+            if (currentPage !== 'scanner' || isScannerPaused) return;
             fetch(getApiUrl('/api/ble_devices'))
                 .then(res => res.json())
                 .then(devices => {

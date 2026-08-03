@@ -44,11 +44,8 @@ def start_ble_scanner_background():
                     mfg_dict = advertisement_data.manufacturer_data or {}
                     has_shared_mfg = 0xFFFF in mfg_dict
 
-                    if not is_medflo and not is_gateway and not has_shared_mfg:
+                    if not is_medflo and not is_gateway:
                         return
-
-                    if not name_raw:
-                        name_raw = f"NMGW2601-{mac}" if is_gateway else f"MEDFLO-{mac}"
 
                     mfg_hex = ""
                     if has_shared_mfg:

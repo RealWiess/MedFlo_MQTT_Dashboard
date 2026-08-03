@@ -30,6 +30,7 @@ PORT = 8080
 
 # Cache for PC local BLE devices scanned by BleakScanner
 local_ble_cache = {}
+ble_scan_enabled = True  # Toggled by frontend via /api/ble_control
 
 def start_ble_scanner_background():
     """Start background BleakScanner thread to scan local BLE devices via PC Bluetooth adapter"""
@@ -53,26 +54,10 @@ def start_ble_scanner_background():
                     mfg_dict = advertisement_data.manufacturer_data or {}
                     has_mfg_ffff = 0xFFFF in mfg_dict
 
-                    is_mfl = name.startswith("MFL-")
-                    is_mfs = name.startswith("MFS-")
+                    # Strict: MFL-/MFS- + 12 hex MAC chars (e.g. MFL-A1B2C3D4E5F6)
+                    is_mfl = len(name_raw) == 16 and name.startswith("MFL-") and all(c in "0123456789ABCDEF" for c in name[4:])
+                    is_mfs = len(name_raw) == 16 and name.startswith("MFS-") and all(c in "0123456789ABCDEF" for c in name[4:])
                     is_gateway = name.startswith("NMGW2601-") or name.startswith("NMGW-") or name.startswith("GW-")
-
-                    # Fallback identification from 0xFFFF Manufacturer Data or Known MAC OUI
-                    if not is_mfl and not is_mfs and not is_gateway:
-                        if has_mfg_ffff:
-                            payload = mfg_dict[0xFFFF]
-                            if len(payload) >= 4 and (payload.startswith(b'2026') or payload.startswith(b'GW')):
-                                is_gateway = True
-                                name_raw = f"NMGW2601-{mac}"
-                            else:
-                                is_mfl = True
-                                name_raw = f"MFL-{mac}"
-                        elif mac.startswith("F44EFD") or mac.startswith("A100"):
-                            is_mfl = True
-                            name_raw = f"MFL-{mac}"
-                        elif mac.startswith("B46DC2") or mac.startswith("C245"):
-                            is_gateway = True
-                            name_raw = f"NMGW2601-{mac}"
 
                     if not is_mfl and not is_mfs and not is_gateway:
                         return
@@ -134,11 +119,21 @@ def start_ble_scanner_background():
 
             try:
                 while True:
+                    if not ble_scan_enabled:
+                        await asyncio.sleep(0.5)
+                        continue
                     try:
                         async with BleakScanner() as scanner:
                             safe_print("[BLE Server Engine] Scanner started, listening for BLE advertisements...")
-                            async for device, advertisement_data in scanner.advertisement_data():
-                                detection_callback(device, advertisement_data)
+                            while ble_scan_enabled:
+                                try:
+                                    device, advertisement_data = await asyncio.wait_for(
+                                        scanner.advertisement_data().__anext__(), timeout=1.0
+                                    )
+                                    detection_callback(device, advertisement_data)
+                                except asyncio.TimeoutError:
+                                    continue  # Check ble_scan_enabled flag
+                            safe_print("[BLE Server Engine] Scanner stopped (page switch)")
                     except Exception as inner_ex:
                         safe_print(f"[BLE Server Engine] BleakScanner loop exception: {inner_ex}")
                         await asyncio.sleep(2.0)
@@ -391,6 +386,9 @@ class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
         if self.path.startswith('/api/ble_devices'):
             self.handle_get_ble_devices()
             return
+        if self.path.startswith('/api/ble_control'):
+            self.handle_ble_control()
+            return
         if self.path.startswith('/api/ble_status'):
             self.handle_get_ble_status()
             return
@@ -480,6 +478,22 @@ class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
             self.wfile.write(body)
         except (ConnectionError, BrokenPipeError, ConnectionResetError, OSError):
             pass
+
+    def handle_ble_control(self):
+        global ble_scan_enabled, local_ble_cache
+        from urllib.parse import urlparse, parse_qs
+        query = parse_qs(urlparse(self.path).query)
+        enable = query.get('enable', [''])[0]
+        if enable == '1':
+            ble_scan_enabled = True
+            safe_print("[BLE Server API] BLE scan ENABLED by frontend")
+        elif enable == '0':
+            ble_scan_enabled = False
+            local_ble_cache.clear()
+            safe_print("[BLE Server API] BLE scan DISABLED by frontend, cache cleared")
+        resp = {"ble_scan_enabled": ble_scan_enabled}
+        body = json.dumps(resp, ensure_ascii=False).encode('utf-8')
+        self._send_json_response(200, body)
 
     def handle_get_ble_devices(self):
         global local_ble_cache
