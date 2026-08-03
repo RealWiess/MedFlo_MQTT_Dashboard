@@ -9,9 +9,20 @@ import asyncio
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+def safe_print(msg):
+    try:
+        sys.stdout.buffer.write((str(msg) + '\n').encode('utf-8', errors='ignore'))
+        sys.stdout.buffer.flush()
+    except Exception:
+        try:
+            print(str(msg).encode('ascii', errors='ignore').decode('ascii'))
+        except Exception:
+            pass
+
 if sys.platform == 'win32':
     try:
         sys.stdout.reconfigure(encoding='utf-8', errors='ignore')
+        sys.stderr.reconfigure(encoding='utf-8', errors='ignore')
     except Exception:
         pass
 
@@ -26,67 +37,88 @@ def start_ble_scanner_background():
         try:
             from bleak import BleakScanner
         except ImportError:
-            print("[BLE Server Engine] Warning: bleak package not found. Local Bluetooth scanning disabled.")
+            safe_print("[BLE Server Engine] Warning: bleak package not found. Local Bluetooth scanning disabled.")
             return
 
-        print("📡 [BLE Server Engine] 啟動本機電腦 Bluetooth 硬體掃描引擎 (Bleak)...")
+        safe_print("[BLE Server Engine] Starting local PC Bluetooth hardware scanning engine (Bleak)...")
 
         async def _async_scan():
             def detection_callback(device, advertisement_data):
+                global local_ble_cache
                 try:
-                    mac = device.address.replace(':', '').upper()
+                    mac = device.address.replace(':', '').replace('-', '').upper()
                     name_raw = advertisement_data.local_name or device.name or ""
                     name = name_raw.upper()
 
-                    is_medflo = name.startswith("MEDFLO-") or mac.startswith("F44EFD") or mac.startswith("A100")
-                    is_gateway = name.startswith("NMGW2601-") or name.startswith("GW-")
-                    
                     mfg_dict = advertisement_data.manufacturer_data or {}
-                    has_shared_mfg = 0xFFFF in mfg_dict
+                    has_mfg_ffff = 0xFFFF in mfg_dict
 
-                    if not is_medflo and not is_gateway and not has_shared_mfg:
+                    is_mfl = name.startswith("MFL-")
+                    is_mfs = name.startswith("MFS-")
+                    is_gateway = name.startswith("NMGW2601-") or name.startswith("NMGW-") or name.startswith("GW-")
+
+                    # Fallback identification from 0xFFFF Manufacturer Data or Known MAC OUI
+                    if not is_mfl and not is_mfs and not is_gateway:
+                        if has_mfg_ffff:
+                            payload = mfg_dict[0xFFFF]
+                            if len(payload) >= 4 and (payload.startswith(b'2026') or payload.startswith(b'GW')):
+                                is_gateway = True
+                                name_raw = f"NMGW2601-{mac}"
+                            else:
+                                is_mfl = True
+                                name_raw = f"MFL-{mac}"
+                        elif mac.startswith("F44EFD") or mac.startswith("A100"):
+                            is_mfl = True
+                            name_raw = f"MFL-{mac}"
+                        elif mac.startswith("B46DC2") or mac.startswith("C245"):
+                            is_gateway = True
+                            name_raw = f"NMGW2601-{mac}"
+
+                    if not is_mfl and not is_mfs and not is_gateway:
                         return
 
-                    if not name_raw:
-                        name_raw = f"NMGW2601-{mac}" if is_gateway else f"MEDFLO-{mac}"
-
                     mfg_hex = ""
-                    if has_shared_mfg:
+                    if has_mfg_ffff:
                         payload = mfg_dict[0xFFFF]
                         mfg_hex = " ".join(f"{b:02X}" for b in payload)
                     elif mfg_dict:
                         for cid, val in mfg_dict.items():
                             mfg_hex += f"{cid:04X} " + " ".join(f"{b:02X}" for b in val)
 
-                    gpio18_stat = "LOW"
+                    gpio18_stat = "HIGH"  # Default: bag empty (0x01)
                     battery_low = False
                     sensor_alert = False
                     wake_counter = None
 
-                    if has_shared_mfg:
+                    # MFL- / MFS- BT v4 Manufacturer Data (0xFFFF) parsing:
+                    # Payload: Byte[0]=GPIO18, Byte[1]=flags, Byte[2-3]=wake_cycle uint16 LE
+                    if has_mfg_ffff and (is_mfl or is_mfs):
                         payload = mfg_dict[0xFFFF]
-                        if len(payload) == 2:
-                            gpio18_stat = "HIGH" if payload[0] == 1 else "LOW"
-                            flags = payload[1]
+                        # Auto-detect and skip Company ID prefix if included
+                        offset = 2 if (len(payload) >= 6 and payload[0] == 0xFF and payload[1] == 0xFF) else 0
+                        if len(payload) >= offset + 4:
+                            gpio18_stat = "HIGH" if payload[offset] == 1 else "LOW"
+                            flags = payload[offset + 1]
                             battery_low = bool(flags & 0x01)
                             sensor_alert = bool(flags & 0x02)
-                        elif len(payload) >= 4:
-                            wake_counter = payload[0] | (payload[1] << 8)
-                        elif len(payload) >= 1:
-                            gpio18_stat = "HIGH" if payload[0] == 1 else "LOW"
+                            wake_counter = payload[offset + 2] | (payload[offset + 3] << 8)
+                        elif len(payload) >= offset + 2:
+                            gpio18_stat = "HIGH" if payload[offset] == 1 else "LOW"
+                            flags = payload[offset + 1]
+                            battery_low = bool(flags & 0x01)
+                            sensor_alert = bool(flags & 0x02)
+                        elif len(payload) >= offset + 1:
+                            gpio18_stat = "HIGH" if payload[offset] == 1 else "LOW"
 
                     prev_dev = local_ble_cache.get(mac, {})
                     new_rssi = advertisement_data.rssi
-                    if new_rssi is not None and -110 < new_rssi <= 0:
-                        rssi_val = new_rssi
-                    else:
-                        rssi_val = prev_dev.get("rssi", -70)
+                    rssi_val = new_rssi if (new_rssi is not None and -110 < new_rssi <= 0) else prev_dev.get("rssi", -70)
 
                     local_ble_cache[mac] = {
                         "mac": mac,
                         "name": name_raw,
                         "rssi": rssi_val,
-                        "stat": 0 if gpio18_stat == "HIGH" else 1,
+                        "stat": 1 if gpio18_stat == "HIGH" else 0,
                         "gpio18": gpio18_stat,
                         "wakeCycleCounter": wake_counter if wake_counter is not None else prev_dev.get("wakeCycleCounter", None),
                         "mfg_hex": mfg_hex or prev_dev.get("mfg_hex", ""),
@@ -96,15 +128,22 @@ def start_ble_scanner_background():
                         "isGateway": is_gateway,
                         "lastSeen": time.time()
                     }
+                    safe_print(f"[BLE Server] Detected: {mac} | {name_raw} | RSSI={rssi_val}")
                 except Exception:
                     pass
 
             try:
-                async with BleakScanner(detection_callback) as scanner:
-                    while True:
-                        await asyncio.sleep(0.5)
+                while True:
+                    try:
+                        async with BleakScanner() as scanner:
+                            safe_print("[BLE Server Engine] Scanner started, listening for BLE advertisements...")
+                            async for device, advertisement_data in scanner.advertisement_data():
+                                detection_callback(device, advertisement_data)
+                    except Exception as inner_ex:
+                        safe_print(f"[BLE Server Engine] BleakScanner loop exception: {inner_ex}")
+                        await asyncio.sleep(2.0)
             except Exception as ex:
-                print(f"[BLE Server Engine] BleakScanner error: {ex}")
+                safe_print(f"[BLE Server Engine] Outer scan error: {ex}")
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -337,20 +376,23 @@ server_serial_mgr = ServerSerialManager()
 
 class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/api/serial_ports':
+        if self.path.startswith('/api/serial_ports'):
             self.handle_get_serial_ports()
             return
-        if self.path == '/api/serial_status':
+        if self.path.startswith('/api/serial_status'):
             self.handle_get_serial_status()
             return
-        if self.path == '/api/launch_pc_app':
+        if self.path.startswith('/api/launch_pc_app'):
             self.handle_launch_pc_app()
             return
-        if self.path == '/api/pc_app_info':
+        if self.path.startswith('/api/pc_app_info'):
             self.handle_get_pc_app_info()
             return
-        if self.path == '/api/ble_devices':
+        if self.path.startswith('/api/ble_devices'):
             self.handle_get_ble_devices()
+            return
+        if self.path.startswith('/api/ble_status'):
+            self.handle_get_ble_status()
             return
         if self.path == '/' or self.path == '':
             self.path = '/mqtt_dashboard.html'
@@ -440,13 +482,29 @@ class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
             pass
 
     def handle_get_ble_devices(self):
+        global local_ble_cache
         now = time.time()
         active_list = []
         for mac, dev in list(local_ble_cache.items()):
-            if now - dev.get("lastSeen", 0) <= 60:
+            if now - dev.get("lastSeen", 0) <= 300:
                 active_list.append(dev)
         
+        safe_print(f"[BLE Server API] /api/ble_devices returning {len(active_list)} active devices (total cache: {len(local_ble_cache)})")
         body = json.dumps(active_list, ensure_ascii=False).encode('utf-8')
+        self._send_json_response(200, body)
+
+    def handle_get_ble_status(self):
+        now = time.time()
+        active_cnt = sum(1 for dev in local_ble_cache.values() if now - dev.get("lastSeen", 0) <= 300)
+        resp = {
+            "status": "ok",
+            "bt_enabled": True,
+            "scanning": True,
+            "engine": "Bleak Python Local PC Adapter",
+            "active_devices_count": active_cnt,
+            "total_cached_count": len(local_ble_cache)
+        }
+        body = json.dumps(resp, ensure_ascii=False).encode('utf-8')
         self._send_json_response(200, body)
 
     def find_pc_app_path(self):
@@ -509,34 +567,31 @@ class MedFlowHTTPHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-def main(enable_ble=True):
+def main(enable_ble=True, auto_open_browser=True):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     if enable_ble:
         start_ble_scanner_background()
-        ble_status = "🔵 BLE 本機掃描: 已啟用"
+        ble_status = "BLE Local Scan: ENABLED"
     else:
-        ble_status = "⚪ BLE 本機掃描: 已停用 (--no-ble)"
+        ble_status = "BLE Local Scan: DISABLED (--no-ble)"
     local_ip = get_local_ip()
     url = f"http://{local_ip}:{PORT}/mqtt_dashboard.html"
 
-    print("=" * 65)
-    print("🏥 MedFlow 滴護寶藍芽動態監測牆 - 全平台一鍵開啟服務已啟動")
-    print("=" * 65)
-    print(f"   {ble_status}")
-    print(f"💻 本機電腦 (Windows / Mac) 雙擊即開:  http://localhost:{PORT}")
-    print(f"📱 移動裝置 (Android / iPhone / iPad) 掃碼連線:")
-    print(f"👉 網址: 【 {url} 】")
-    print("-" * 65)
-    print("✨ 一鍵體驗指引:")
-    print("  1. Windows / Mac 用戶: 系統已自動幫您開啟瀏覽器視窗！")
-    print("  2. 手機 / 平板用戶: 拿起相機掃描電腦畫面上的 QR Code 即可一鍵載入。")
-    print("=" * 65)
+    safe_print("=" * 65)
+    safe_print("MedFlow Bluetooth Dynamic Dashboard Server Started")
+    safe_print("=" * 65)
+    safe_print(f"   {ble_status}")
+    safe_print(f"Local PC: http://localhost:{PORT}")
+    safe_print(f"Mobile / Network URL: {url}")
+    safe_print("=" * 65)
 
-    try:
-        webbrowser.open(f"http://localhost:{PORT}")
-    except Exception:
-        pass
+    if auto_open_browser:
+        try:
+            webbrowser.open(f"http://localhost:{PORT}")
+        except Exception:
+            pass
 
+    HTTPServer.allow_reuse_address = True
     httpd = HTTPServer(('0.0.0.0', PORT), MedFlowHTTPHandler)
     try:
         httpd.serve_forever()
@@ -547,5 +602,6 @@ def main(enable_ble=True):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MedFlow MQTT Dashboard Server')
     parser.add_argument('--no-ble', action='store_true', help='停用本機 BLE 藍牙背景掃描（避免與 MedFlo_scanner 等桌面工具搶佔藍牙適配器）')
+    parser.add_argument('--no-browser', action='store_true', help='啟動後不自動打開瀏覽器頁面（適用於由批次檔進行外部輪詢與開啟的情況）')
     args = parser.parse_args()
-    main(enable_ble=not args.no_ble)
+    main(enable_ble=not args.no_ble, auto_open_browser=not args.no_browser)

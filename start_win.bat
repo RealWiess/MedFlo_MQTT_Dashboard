@@ -7,7 +7,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8080.*LISTENING" 2^>nul') d
 ping 127.0.0.1 -n 2 >nul
 
 :: --- 2. Start server.py in a separate background window ---
-start "MedFlow-Server" /min cmd /c "python server.py"
+start "MedFlow-Server" /min cmd /c "python server.py --no-browser"
 
 :: --- 3. Wait until server actually responds (max ~15 seconds) ---
 set /a tries=0

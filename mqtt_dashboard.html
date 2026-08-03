@@ -222,8 +222,15 @@
         }
 
         .device-card.offline {
-            opacity: 0.55;
-            filter: grayscale(60%);
+            background: rgba(15, 23, 42, 0.55) !important;
+            border-color: rgba(255, 255, 255, 0.04) !important;
+        }
+
+        .device-card.offline .status-indicator,
+        .device-card.offline .info-row,
+        .device-card.offline .rssi-bar-container {
+            opacity: 0.35;
+            filter: grayscale(85%);
         }
 
         .device-card .card-header {
@@ -1592,6 +1599,179 @@
             justify-content: space-between;
         }
 
+        /* Custom view mode styles */
+        .devices-grid.view-mode-table {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            grid-template-columns: none !important;
+        }
+        
+        .devices-grid.view-mode-matrix {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            grid-template-columns: none !important;
+            align-content: start;
+        }
+        
+        /* Compact Table Styling */
+        .compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            color: var(--text-main);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .compact-table th, .compact-table td {
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .compact-table th {
+            background: rgba(255, 255, 255, 0.04);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .compact-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+        }
+        
+        .compact-table tr.offline-row {
+            opacity: 0.65;
+        }
+        
+        /* Matrix Dot Styling */
+        .matrix-dot {
+            width: 38px;
+            height: 38px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .matrix-dot:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+            border-color: var(--accent-cyan);
+        }
+        
+        .matrix-dot.state-full {
+            background: linear-gradient(135deg, #854d0e, #a16207);
+            color: #fef08a;
+            box-shadow: inset 0 0 4px rgba(253, 224, 71, 0.4);
+        }
+        
+        .matrix-dot.state-empty {
+            background: linear-gradient(135deg, #065f46, #047857);
+            color: #a7f3d0;
+            box-shadow: inset 0 0 4px rgba(52, 211, 153, 0.3);
+        }
+        
+        .matrix-dot.state-sampling {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #94a3b8;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        
+        .matrix-dot.state-offline {
+            background: #0f172a;
+            color: rgba(255,255,255,0.25);
+            border-color: rgba(255, 255, 255, 0.05);
+            opacity: 0.6;
+        }
+        
+        .matrix-dot.state-service-terminated {
+            background: rgba(167, 139, 250, 0.08);
+            color: #c084fc;
+            border-color: rgba(167, 139, 250, 0.25);
+            opacity: 0.55;
+            text-decoration: line-through;
+        }
+        
+        .matrix-dot.state-offline-anomaly {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.45);
+            border-style: dashed;
+            animation: matrix-anomaly-pulse 2s infinite alternate;
+        }
+        
+        .matrix-dot.state-cooling-down {
+            background: rgba(96, 165, 250, 0.08);
+            color: #93c5fd;
+            border-color: rgba(96, 165, 250, 0.25);
+            opacity: 0.6;
+        }
+        
+        .matrix-dot.state-waiting-offline {
+            background: rgba(148, 163, 184, 0.06);
+            color: #94a3b8;
+            border-color: rgba(148, 163, 184, 0.15);
+            opacity: 0.5;
+        }
+        
+        @keyframes matrix-anomaly-pulse {
+            0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 2px rgba(239, 68, 68, 0.1); }
+            100% { border-color: rgba(239, 68, 68, 0.75); box-shadow: 0 0 6px rgba(239, 68, 68, 0.35); }
+        }
+
+        .device-card.state-service-terminated { border-color: rgba(167, 139, 250, 0.18); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(167, 139, 250, 0.02)); }
+        .device-card.state-offline-anomaly {
+            border-color: rgba(239, 68, 68, 0.25) !important;
+            border-style: dashed !important;
+            background: rgba(15, 23, 42, 0.55) !important;
+            box-shadow: none !important;
+        }
+        .device-card.state-offline-anomaly .device-name {
+            color: #ffffff !important;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+            font-weight: bold;
+        }
+        .device-card.state-cooling-down { border-color: rgba(96, 165, 250, 0.18); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(96, 165, 250, 0.01)); }
+        .device-card.state-waiting-offline { border-color: rgba(148, 163, 184, 0.12); background: rgba(30, 41, 59, 0.25); }
+
+        .remove-card-btn {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+        .remove-card-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
 <body>
@@ -1626,6 +1806,7 @@
             <div class="connection-status" id="connection-status-panel">
                 <div class="status-dot" id="status-dot"></div>
                 <span id="status-text">未連線</span>
+                <span id="header-disconnect-badge" style="display: none; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px;">斷線 0 次</span>
             </div>
         </div>
     </header>
@@ -1658,7 +1839,7 @@
                 <div class="mode-card" onclick="switchPage('scanner')">
                     <div class="mode-icon-glow">🔍</div>
                     <h3 class="mode-title">BLE 廣播與硬體掃描分析儀</h3>
-                    <p class="mode-desc">獨立跨平台 BLE 廣播探針：即時解析 MEDFLO-* 傳輸器與 NMGW2601-* 網關 Manufacturer Data (0xFFFF)、GPIO18 狀態、電池低電量警示與 CSV Log 記錄分析。</p>
+                    <p class="mode-desc">本機 BLE 廣播探針：純本機藍芽硬體 (Bleak Engine / Web BLE / 專用探針) 實體廣播掃描。即時解析 MFL/MFS 傳輸器 Manufacturer Data (0xFFFF)、GPIO18 狀態、Wake Cycle 與 CSV 導出。</p>
                     <button class="mode-btn">進入 BLE 掃描分析儀 →</button>
                 </div>
 
@@ -1715,6 +1896,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16V8a2 2 0 0 0-2-2h-2m-9 0H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/><path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
                         連線設定 (訂閱端)
                     </div>
+                    <div id="connection-stats" style="font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+                        <span>MQTT 斷線計數: <strong id="mqtt-disconnect-count" style="color: var(--accent-red); font-weight: bold;">0</strong> 次</span>
+                        <button class="btn-sm" onclick="resetMqttDisconnectCount()" style="padding: 2px 6px; font-size: 0.7rem; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: var(--text-main); cursor: pointer; border-radius: 4px; border: 1px solid;">重置</button>
+                    </div>
                     <div class="form-group">
                         <label for="proto">通訊協定</label>
                         <select id="proto">
@@ -1750,7 +1935,7 @@
                         <label for="topic">訂閱 Topic</label>
                         <input type="text" id="topic" value="DCare/#">
                     </div>
-                    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-direction: column;">
                         <button class="btn-primary" id="btn-connect" onclick="toggleConnection()">連接伺服器</button>
                     </div>
                 </div>
@@ -1838,7 +2023,13 @@
                 <div class="section-title-bar">
                     <div class="section-title">🏥 滴護寶裝置實時狀態</div>
                     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                        <button onclick="clearAllDeviceCards()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold;" title="一鍵清空所有舊的快取卡片">🧹 一鍵清空面板卡片</button>
+                        <!-- 檢視模式切換器 -->
+                        <div class="view-toggle-container" style="display: flex; background: rgba(255, 255, 255, 0.06); padding: 2px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); margin-right: 0.25rem;">
+                            <button id="view-btn-card" onclick="setDashboardViewMode('card')" style="background: var(--accent-cyan); color: #0f172a; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">🎴 卡片</button>
+                            <button id="view-btn-table" onclick="setDashboardViewMode('table')" style="background: transparent; color: var(--text-muted); border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">📋 列表</button>
+                            <button id="view-btn-matrix" onclick="setDashboardViewMode('matrix')" style="background: transparent; color: var(--text-muted); border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">📊 矩陣</button>
+                        </div>
+                        <button onclick="clearAllDeviceCards()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 0.3rem 0.75rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold;" title="一鍵清空所有舊的快取卡片">🧹 一鍵清空面板</button>
                         <div class="device-count-badge" id="device-count-badge">0 個裝置在線</div>
                         <div style="display: flex; align-items: center; gap: 0.25rem;">
                             <div class="device-count-badge" id="max-last-seen-badge" style="background: rgba(6, 182, 212, 0.12); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.25);" title="持久化紀錄：統計在線 BT 傳輸器歷史上報 log 最慢/最久的間隔時間高點紀錄">⏱️ 最慢更新紀錄: -</div>
@@ -2130,7 +2321,7 @@
                     <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);">📱</div>
                     <div>
                         <div class="metric-val" id="scanner-medflo-devs">0</div>
-                        <div class="metric-lbl">MEDFLO 傳輸器</div>
+                        <div class="metric-lbl">MedFlow 傳輸器 (MFL / MFS)</div>
                     </div>
                 </div>
                 <div class="metric-card">
@@ -2144,8 +2335,29 @@
                     <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);">⚠</div>
                     <div>
                         <div class="metric-val" id="scanner-alert-devs" style="color: var(--accent-red);">0</div>
-                        <div class="metric-lbl">低電量 / 異常警告</div>
+                        <div class="metric-lbl">感測器異常告警</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Local Bluetooth Status & Control Bar -->
+            <div class="local-bt-status-bar" id="local-bt-status-bar" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 8px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.4rem;">📡</span>
+                    <div>
+                        <div style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span>本機藍芽硬體狀態 (Local PC Bluetooth)</span>
+                            <span id="local-bt-status-badge" class="badge-status badge-ok" style="font-size: 0.75rem;">🟢 檢測本機硬體中...</span>
+                        </div>
+                        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;" id="local-bt-status-desc">
+                            本頁面 100% 獨立連線本機藍芽硬體 (與 MQTT 無關)。正透過本機藍芽掃描引擎搜尋周遭實體藍芽傳輸器與網關...
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button class="nav-btn" onclick="checkLocalBtServerStatus()" style="border-color: var(--accent-cyan); color: var(--accent-cyan); font-size: 0.78rem; padding: 4px 12px;">
+                        🔄 重新檢查本機硬體
+                    </button>
                 </div>
             </div>
 
@@ -2182,7 +2394,7 @@
             <!-- Device Type Tab Bar -->
             <div class="scanner-tab-bar">
                 <button class="tab-btn active" id="tab-scanner-medflo" onclick="switchScannerTab('medflo')">
-                    📱 MEDFLO-* 傳輸器列表 (<span id="cnt-tab-medflo">0</span>)
+                    📱 MedFlow 傳輸器列表 (MFL / MFS) (<span id="cnt-tab-medflo">0</span>)
                 </button>
                 <button class="tab-btn" id="tab-scanner-gateway" onclick="switchScannerTab('gateway')">
                     🌐 NMGW2601-* 醫療網關列表 (<span id="cnt-tab-gateway">0</span>)
@@ -2665,7 +2877,7 @@
         <div class="modal-card" style="max-width: 840px; max-height: calc(100vh - 2.5rem); display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.96); border: 1px solid var(--accent-yellow); overflow: hidden; padding: 1.25rem 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.6);">
             <div class="modal-header" style="border-bottom: 1px solid var(--bg-card-border); padding-bottom: 0.75rem; flex-shrink: 0; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="margin: 0; color: var(--accent-yellow); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;" id="drip-modal-title">
-                    💧 尿袋狀態 75% 門檻容錯診斷與最近 30 筆 Gateway 報出 Log
+                    💧 尿袋狀態與最近 30 筆 Gateway 報出 Log
                 </h3>
                 <button class="modal-close" onclick="closeBtDripLogsModal()">&times;</button>
             </div>
@@ -2675,7 +2887,7 @@
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; font-size: 0.83rem; background: rgba(2, 6, 23, 0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--bg-card-border);">
                     <div><span style="color: var(--text-muted);">傳輸器名稱 (Device):</span> <strong id="drip-modal-dev-name" style="color: #fff; font-weight: 700;">-</strong></div>
                     <div><span style="color: var(--text-muted);">MAC Address:</span> <strong id="drip-modal-dev-mac" style="color: var(--accent-cyan); font-family: 'Fira Code', monospace;">-</strong></div>
-                    <div><span style="color: var(--text-muted);">當前 75% 判定狀態:</span> <span id="drip-modal-confirmed-state" style="font-weight: 700;">-</span></div>
+                    <div><span style="color: var(--text-muted);">當前判定狀態:</span> <span id="drip-modal-confirmed-state" style="font-weight: 700;">-</span></div>
                     <div><span style="color: var(--text-muted);">最近 20 筆「滿」比例:</span> <strong id="drip-modal-full-ratio" style="color: var(--accent-yellow); font-family: 'Fira Code', monospace;">0%</strong></div>
                     <div><span style="color: var(--text-muted);">最近 20 筆「空」比例:</span> <strong id="drip-modal-empty-ratio" style="color: var(--accent-green); font-family: 'Fira Code', monospace;">0%</strong></div>
                     <div><span style="color: var(--text-muted);">週期「滿」觸發累計:</span> <strong id="drip-modal-full-count" style="color: #fef08a; font-family: 'Fira Code', monospace;">0 次</strong></div>
@@ -2683,7 +2895,7 @@
 
                 <!-- 75% Rule Explanatory Banner -->
                 <div id="drip-modal-eval-banner" style="padding: 0.75rem 1rem; background: rgba(234, 179, 8, 0.1); border-left: 4px solid var(--accent-yellow); border-radius: 6px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.55;">
-                    🛡️ <strong>75% 門檻容錯機制 (Hysteresis Rule)</strong>：連續 20 筆封包內訊號集中度 $\ge 75\%$ 始觸發切換（需達到 15/20 筆）；若未達 75% 門檻則自動鎖定保持當前確定狀態，防止雜訊引起頻繁閃爍。
+                    🛡️ <strong>狀態容錯機制</strong>：此處已改為直接顯示接收到的狀態（網關端已進行 75% 門檻容錯機制處理）。
                 </div>
 
                 <!-- Table: Recent 30 Telemetry Logs & Gateway Path -->
@@ -2810,9 +3022,9 @@
         function appendToLocalLogBuffer(telemetryItem) {
             localLogBuffer.push(telemetryItem);
             
-            // Calculate JSON byte size
-            const jsonStr = JSON.stringify(localLogBuffer);
-            localLogByteSize = new Blob([jsonStr]).size;
+            // 增量估算大小，避免高頻執行 JSON.stringify 整個陣列導致瀏覽器卡死
+            const itemSize = JSON.stringify(telemetryItem).length + 1; // 估計物件長度 + 逗號
+            localLogByteSize += itemSize;
             
             updateGDriveBufferUI();
             
@@ -2871,7 +3083,34 @@
             }
 
             if (isUploadingGDrive) return;
+
+            if (localLogBuffer.length === 0) {
+                if (isManual) alert('目前本機沒有累積的 Log 數據需要上傳！');
+                return;
+            }
+
             isUploadingGDrive = true;
+
+            // Slice logs to ensure size is under 10MB to avoid GAS 50MB crash and CORS failures
+            const MAX_CHUNK_BYTES = 10 * 1024 * 1024; // 10MB
+            let chunkLogs = [];
+            let estimatedSize = 2; // For brackets []
+            let i = 0;
+            while (i < localLogBuffer.length) {
+                const itemStr = JSON.stringify(localLogBuffer[i]);
+                const itemSize = itemStr.length + (chunkLogs.length > 0 ? 1 : 0);
+                if (estimatedSize + itemSize > MAX_CHUNK_BYTES) {
+                    break;
+                }
+                chunkLogs.push(localLogBuffer[i]);
+                estimatedSize += itemSize;
+                i++;
+            }
+
+            // Fallback: If single log is somehow larger than 10MB (virtually impossible), send at least 1 log to avoid infinite loop
+            if (chunkLogs.length === 0 && localLogBuffer.length > 0) {
+                chunkLogs.push(localLogBuffer[0]);
+            }
 
             // Timestamped Filename format: MedFlow_Logs_YYYYMMDD_HHMMSS.json
             const now = new Date();
@@ -2883,18 +3122,23 @@
             const min = pad(now.getMinutes());
             const ss = pad(now.getSeconds());
             const timestampStr = `${yyyy}${mm}${dd}_${hh}${min}${ss}`;
-            const filename = `MedFlow_Logs_${timestampStr}.json`;
+            
+            // If we are uploading only a part of the buffer, add a chunk suffix
+            const isPartial = chunkLogs.length < localLogBuffer.length;
+            const suffix = isPartial ? `_part_${chunkLogs.length}_of_${localLogBuffer.length}` : '';
+            const filename = `MedFlow_Logs_${timestampStr}${suffix}.json`;
 
-            const logsToUpload = [...localLogBuffer];
-            const sizeMb = (localLogByteSize / (1024 * 1024)).toFixed(2);
+            const uploadedCount = chunkLogs.length;
+            const chunkSizeMb = (estimatedSize / (1024 * 1024)).toFixed(2);
+            const totalBufferMb = (localLogByteSize / (1024 * 1024)).toFixed(2);
 
             if (typeof addLogMessage === 'function') {
-                addLogMessage('雲端備份', `🚀 正在上傳 ${logsToUpload.length} 筆 Log (${sizeMb} MB) 至 Google Drive [${filename}]...`);
+                addLogMessage('雲端備份', `🚀 正在上傳分片 ${uploadedCount} 筆 Log (${chunkSizeMb} MB / 總計 ${totalBufferMb} MB) 至 Google Drive [${filename}]...`);
             }
 
             const payload = {
                 filename: filename,
-                content: logsToUpload
+                content: chunkLogs
             };
 
             fetch(webhookUrl, {
@@ -2909,9 +3153,10 @@
             .then(data => {
                 isUploadingGDrive = false;
                 if (data && (data.status === 'success' || data.result === 'success' || data.fileId)) {
-                    // SUCCESS! Purge/delete uploaded local log buffer!
-                    const uploadedCount = logsToUpload.length;
+                    // SUCCESS! Purge/delete only the uploaded logs from local log buffer!
                     localLogBuffer.splice(0, uploadedCount);
+                    
+                    // Recalculate local log byte size based on remaining logs
                     const jsonStr = JSON.stringify(localLogBuffer);
                     localLogByteSize = new Blob([jsonStr]).size;
                     
@@ -2926,9 +3171,31 @@
                     updateGDriveBufferUI();
 
                     if (typeof addLogMessage === 'function') {
-                        addLogMessage('雲端備份', `✅ 成功上傳至 Google Drive [${filename}]！已自動刪除本機已被備份之 ${uploadedCount} 筆 Log 檔！`);
+                        addLogMessage('雲端備份', `✅ 成功上傳分片至 Google Drive [${filename}]！已自動刪除本機已備份之 ${uploadedCount} 筆 Log 檔！`);
                     }
-                    if (isManual) alert(`✅ 成功上傳至 Google Drive！\n檔名：${filename}\n容量：${sizeMb} MB (${uploadedCount} 筆)\n本機快取已自動清空！`);
+
+                    // Auto-trigger next chunk if there's still more than 20MB remaining
+                    const autoModeEl = document.getElementById('gdrive-auto-upload-checkbox');
+                    const isAutoUpload = autoModeEl ? autoModeEl.checked : true;
+                    const thresholdBytes = 20 * 1024 * 1024; // 20 MB
+
+                    if (localLogByteSize > thresholdBytes && isAutoUpload) {
+                        if (typeof addLogMessage === 'function') {
+                            addLogMessage('雲端備份', `⏳ 偵測到本機還有 ${(localLogByteSize / (1024 * 1024)).toFixed(2)} MB 快取，將在 1.5 秒後自動啟動下一個分片上傳...`);
+                        }
+                        setTimeout(() => {
+                            uploadLogChunkToGDrive(false);
+                        }, 1500);
+                    } else if (isManual) {
+                        if (localLogByteSize > 0) {
+                            alert(`✅ 成功上傳目前分片！\n容量：${chunkSizeMb} MB (${uploadedCount} 筆)\n剩餘：${(localLogByteSize / (1024 * 1024)).toFixed(2)} MB 待上傳。`);
+                            setTimeout(() => {
+                                uploadLogChunkToGDrive(true);
+                            }, 1500);
+                        } else {
+                            alert(`✅ 成功上傳所有分片！\n本機快取已完全清空！`);
+                        }
+                    }
                 } else {
                     throw new Error(data.message || 'GAS 回傳失敗');
                 }
@@ -2937,7 +3204,7 @@
                 isUploadingGDrive = false;
                 console.error('Google Drive Upload Error:', err);
                 if (typeof addLogMessage === 'function') {
-                    addLogMessage('雲端備份', `❌ Google Drive 上傳失敗 (${err.message})。Log 安全保留於本機 Buffer。`);
+                    addLogMessage('雲端備份', `❌ Google Drive 上傳失敗 (${err.message})。剩餘 Log 安全保留於本機 Buffer。`);
                 }
                 if (isManual) alert(`❌ 上傳 Google Drive 失敗：${err.message}\n請檢查 Webhook 網址或網路連線。Log 仍保留在本機 Buffer 中。`);
             });
@@ -3399,6 +3666,7 @@
                 username: username,
                 password: password,
                 clean: true,
+                keepalive: 30,      // 每 30 秒發送一次 Ping，維持 NAT 路由表活躍
                 connectTimeout: 8000,
                 reconnectPeriod: 0  // 停用自動重連，避免瀏覽器無限重連卡死
             };
@@ -3435,6 +3703,9 @@
                 client.on('close', () => {
                     if (connectionState === 'disconnected') return;
                     console.log('MQTT Connection closed.');
+                    if (connectionState === 'connected') {
+                        incrementMqttDisconnectCount();
+                    }
                     cleanupClient();
                     showOfflineBanner('MQTT 連線已關閉，正在嘗試自動重連...');
                     scheduleReconnect();
@@ -3443,6 +3714,9 @@
                 client.on('offline', () => {
                     if (connectionState === 'disconnected') return;
                     console.warn('MQTT client is offline (no connection).');
+                    if (connectionState === 'connected') {
+                        incrementMqttDisconnectCount();
+                    }
                     cleanupClient();
                     showOfflineBanner('無法連上 MQTT 伺服器，正在嘗試自動重連...');
                     scheduleReconnect();
@@ -3498,27 +3772,20 @@
             });
         }
 
-        // Display messages
-        function addLiveMessage(topic, rawPayload, isSystem = false) {
-            const container = document.getElementById('messages-container');
-            const emptyState = document.getElementById('empty-state');
-            
-            if (emptyState) {
-                emptyState.remove();
-            }
+        // Display messages with batched throttling to prevent layout thrashing and tab freezing
+        let liveMessageQueue = [];
+        let liveMessageRenderTimer = null;
 
+        function addLiveMessage(topic, rawPayload, isSystem = false, isError = false) {
             const timestamp = new Date().toLocaleTimeString() + '.' + String(new Date().getMilliseconds()).padStart(3, '0');
             
             let displayPayload = rawPayload;
             let isJSON = false;
             try {
-                // Check if JSON
                 const parsed = JSON.parse(rawPayload);
                 displayPayload = JSON.stringify(parsed, null, 2);
                 isJSON = true;
-            } catch(e) {
-                // Not JSON
-            }
+            } catch(e) {}
 
             const msgObject = {
                 id: Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -3527,67 +3794,93 @@
                 formatted: isJSON ? displayPayload : rawPayload,
                 timestamp: timestamp,
                 isJSON: isJSON,
-                isSystem: isSystem
+                isSystem: isSystem,
+                isError: isError
             };
 
             messages.push(msgObject);
-            // Cap history to 500 messages to prevent memory bloating
             if (messages.length > 500) {
                 messages.shift();
             }
 
-            // Create DOM element
-            createMessageCard(msgObject);
-
-            // Cap DOM elements to max 100 to prevent browser slowdown and window freeze
-            if (container.children.length > 100) {
-                const firstChild = container.firstElementChild;
-                if (firstChild && firstChild.id !== 'empty-state') {
-                    firstChild.remove();
-                }
-            }
+            liveMessageQueue.push(msgObject);
+            scheduleLiveMessagesRender();
         }
 
         function addLogMessage(topic, text, isError = false) {
-            addLiveMessage(topic, text, true);
-            const container = document.getElementById('messages-container');
-            const lastCard = container.lastElementChild;
-            if (lastCard) {
-                lastCard.style.borderLeftColor = isError ? 'var(--accent-red)' : 'var(--accent-cyan)';
-            }
+            addLiveMessage(topic, text, true, isError);
         }
 
-        function createMessageCard(msg) {
+        function scheduleLiveMessagesRender() {
+            if (liveMessageRenderTimer) return;
+            liveMessageRenderTimer = setTimeout(() => {
+                liveMessageRenderTimer = null;
+                flushLiveMessagesQueue();
+            }, 250); // 250ms batch rendering
+        }
+
+        function flushLiveMessagesQueue() {
+            if (liveMessageQueue.length === 0) return;
+
             const container = document.getElementById('messages-container');
-            
-            const card = document.createElement('div');
-            card.className = `message-card ${msg.isSystem ? 'system' : ''}`;
-            card.id = `msg-${msg.id}`;
-            
-            // Apply quick filter on creation
+            if (!container) return;
+
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
             const filterVal = document.getElementById('search-input').value.toLowerCase();
-            if (filterVal) {
-                const matchTopic = msg.topic.toLowerCase().includes(filterVal);
-                const matchPayload = msg.payload.toLowerCase().includes(filterVal);
-                if (!matchTopic && !matchPayload) {
-                    card.style.display = 'none';
+            const fragment = document.createDocumentFragment();
+
+            // Render at most 40 items at once to avoid layout lock
+            const renderBatch = liveMessageQueue.slice(-40);
+            liveMessageQueue = [];
+
+            renderBatch.forEach(msg => {
+                const card = document.createElement('div');
+                card.className = `message-card ${msg.isSystem ? 'system' : ''}`;
+                card.id = `msg-${msg.id}`;
+
+                if (filterVal) {
+                    const matchTopic = msg.topic.toLowerCase().includes(filterVal);
+                    const matchPayload = msg.payload.toLowerCase().includes(filterVal);
+                    if (!matchTopic && !matchPayload) {
+                        card.style.display = 'none';
+                    }
+                }
+
+                let renderedPayload = msg.formatted;
+                if (msg.isJSON) {
+                    renderedPayload = syntaxHighlight(msg.formatted);
+                }
+
+                card.innerHTML = `
+                    <div class="message-header">
+                        <span class="topic-badge">${msg.topic}</span>
+                        <span class="timestamp">${msg.timestamp}</span>
+                    </div>
+                    <div class="message-body">${renderedPayload}</div>
+                `;
+
+                if (msg.isSystem) {
+                    card.style.borderLeftColor = msg.isError ? 'var(--accent-red)' : 'var(--accent-cyan)';
+                }
+
+                fragment.appendChild(card);
+            });
+
+            container.appendChild(fragment);
+
+            // Keep DOM count under 100
+            while (container.children.length > 100) {
+                const firstChild = container.firstElementChild;
+                if (firstChild && firstChild.id !== 'empty-state') {
+                    firstChild.remove();
+                } else {
+                    break;
                 }
             }
-
-            let renderedPayload = msg.formatted;
-            if (msg.isJSON) {
-                renderedPayload = syntaxHighlight(msg.formatted);
-            }
-
-            card.innerHTML = `
-                <div class="message-header">
-                    <span class="topic-badge">${msg.topic}</span>
-                    <span class="timestamp">${msg.timestamp}</span>
-                </div>
-                <div class="message-body">${renderedPayload}</div>
-            `;
-
-            container.appendChild(card);
 
             if (autoScroll) {
                 container.scrollTop = container.scrollHeight;
@@ -3706,6 +3999,86 @@
             });
         }
 
+        // View modes and pagination for high density device monitoring (up to 1000 devices)
+        let currentDashboardViewMode = localStorage.getItem('medflow_dashboard_view_mode') || 'card';
+        let currentDevicesPage = 1;
+        const DEVICES_PER_PAGE = 50;
+
+        function setDashboardViewMode(mode) {
+            currentDashboardViewMode = mode;
+            try {
+                localStorage.setItem('medflow_dashboard_view_mode', mode);
+            } catch(e) {}
+            
+            const btnCard = document.getElementById('view-btn-card');
+            const btnTable = document.getElementById('view-btn-table');
+            const btnMatrix = document.getElementById('view-btn-matrix');
+            
+            [
+                { btn: btnCard, m: 'card' },
+                { btn: btnTable, m: 'table' },
+                { btn: btnMatrix, m: 'matrix' }
+            ].forEach(item => {
+                if (item.btn) {
+                    if (item.m === mode) {
+                        item.btn.style.background = 'var(--accent-cyan)';
+                        item.btn.style.color = '#0f172a';
+                    } else {
+                        item.btn.style.background = 'transparent';
+                        item.btn.style.color = 'var(--text-muted)';
+                    }
+                }
+            });
+
+            const grid = document.getElementById('devices-grid');
+            if (grid) {
+                // Remove existing modifier classes
+                grid.classList.remove('view-mode-card', 'view-mode-table', 'view-mode-matrix');
+                grid.classList.add(`view-mode-${mode}`);
+            }
+
+            renderDevicesGrid();
+        }
+
+        function changeDevicesPage(delta) {
+            currentDevicesPage += delta;
+            renderDevicesGrid();
+        }
+
+        // MQTT Disconnect Counter with LocalStorage Persistence
+        let mqttDisconnectCount = 0;
+        try {
+            mqttDisconnectCount = parseInt(localStorage.getItem('medflow_mqtt_disconnect_count')) || 0;
+        } catch (e) {}
+
+        function incrementMqttDisconnectCount() {
+            mqttDisconnectCount++;
+            try {
+                localStorage.setItem('medflow_mqtt_disconnect_count', mqttDisconnectCount);
+            } catch (e) {}
+            updateMqttDisconnectUI();
+        }
+
+        function resetMqttDisconnectCount() {
+            if (confirm('確定要將 MQTT 斷線次數歸零嗎？')) {
+                mqttDisconnectCount = 0;
+                try {
+                    localStorage.setItem('medflow_mqtt_disconnect_count', 0);
+                } catch (e) {}
+                updateMqttDisconnectUI();
+            }
+        }
+
+        function updateMqttDisconnectUI() {
+            const countEl = document.getElementById('mqtt-disconnect-count');
+            const badgeEl = document.getElementById('header-disconnect-badge');
+            if (countEl) countEl.textContent = mqttDisconnectCount;
+            if (badgeEl) {
+                badgeEl.textContent = `斷線 ${mqttDisconnectCount} 次`;
+                badgeEl.style.display = mqttDisconnectCount > 0 ? 'inline-block' : 'none';
+            }
+        }
+
         // Active Devices Map with LocalStorage Persistence & Forced 7/27 15:00 Online Time Override
         const DEFAULT_FORCED_ONLINE_MS = new Date('2026-07-27T15:00:00+08:00').getTime();
         const DEFAULT_FORCED_ONLINE_STR = '7/27 15:00';
@@ -3718,8 +4091,49 @@
             console.warn('Failed to load saved devices from LocalStorage:', e);
         }
 
-        // Force override existing active devices to 7/27 15:00
+        // Set of removed MAC addresses to filter them from telemetry updates
+        let removedDevices = new Set(JSON.parse(localStorage.getItem('medflow_removed_devices') || '[]'));
+
+        // Ensure 82F6 is created as a test device if not present, and forced to 168.25 hours ago
+        let targetMacKey = null;
+        Object.keys(activeDevices).forEach(mac => {
+            if (mac.toUpperCase().includes('82F6')) {
+                targetMacKey = mac;
+            }
+        });
+
+        if (!targetMacKey) {
+            // Create a simulated device ending in 82F6
+            const mockMac = 'F44EFDD782F6';
+            activeDevices[mockMac] = {
+                mac: mockMac,
+                name: 'MEDFLO-82F6',
+                gwid: 'GW202601',
+                rssi: -78,
+                lastSeen: Date.now() - 5000,
+                lastSeenMs: Date.now() - 5000,
+                recentStatHistory: Array(20).fill(1), // 20 empty packets
+                confirmedState: 1, // Empty
+                dripFullCount: 2,
+                batteryLow: false,
+                sensorAlert: false,
+                hasFlags: true
+            };
+            targetMacKey = mockMac;
+        }
+
+        // Set its firstSeenMs to 168 hours and 15 minutes ago so it is in "服務中止"
+        // and will enter "冷卻中" after 15 minutes (which is half an hour after termination!)
+        if (targetMacKey && activeDevices[targetMacKey]) {
+            const seedOffsetMs = 168 * 3600 * 1000 + 15 * 60 * 1000; // 168h 15m
+            activeDevices[targetMacKey].firstSeenMs = Date.now() - seedOffsetMs;
+            const termDate = new Date(activeDevices[targetMacKey].firstSeenMs);
+            activeDevices[targetMacKey].firstSeenTimeStr = `${termDate.getMonth() + 1}/${termDate.getDate()} ${String(termDate.getHours()).padStart(2, '0')}:${String(termDate.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Force override existing active devices to 7/27 15:00 (except 82F6)
         Object.values(activeDevices).forEach(dev => {
+            if (dev.mac.toUpperCase().includes('82F6')) return;
             dev.firstSeenMs = DEFAULT_FORCED_ONLINE_MS;
             dev.firstSeenTimeStr = DEFAULT_FORCED_ONLINE_STR;
         });
@@ -3731,12 +4145,13 @@
         }
 
         // Parse BLE advertisement data to extract status flags (Battery / Alert) & Scan Response (Wake Cycle Counter)
-        function parseBleData(hexData) {
+        function parseBleData(hexData, isNewFw = false) {
             let result = {
                 batteryLow: false,
                 sensorAlert: false,
                 hasFlags: false,
-                wakeCycleCounter: null
+                wakeCycleCounter: null,
+                gpioStatus: null
             };
             if (!hexData) return result;
             
@@ -3749,32 +4164,73 @@
                 let foundAd = false;
                 while (idx < clean.length - 3) {
                     let len = parseInt(clean.substr(idx, 2), 16);
-                    if (isNaN(len) || len === 0 || idx + (len + 1) * 2 > clean.length) break;
+                    if (isNaN(len) || len === 0 || idx + 2 + len * 2 > clean.length) break;
                     let type = clean.substr(idx + 2, 2);
                     if (type === "FF") {
                         foundAd = true;
                         let mfgLen = len - 1; // bytes after AD Type (including 2B Company ID)
-                        if (mfgLen === 4) { 
-                            // Main Advertising Payload: Company ID (2B: FFFF) + GPIO18 status (1B) + Status Flags (1B)
-                            let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
-                            if (!isNaN(flagsVal)) {
-                                result.batteryLow = (flagsVal & 0x01) !== 0;
-                                result.sensorAlert = (flagsVal & 0x02) !== 0;
-                                result.hasFlags = true;
+                        if (isNewFw) {
+                            if (mfgLen === 6) {
+                                // New Mfg Data: Company ID (2) + GPIO18 (1) + Status Flags (1) + wake_cycle (2 uint16 LE)
+                                let gpioVal = parseInt(clean.substr(idx + 8, 2), 16);
+                                if (!isNaN(gpioVal)) {
+                                    result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                                }
+                                let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
+                                if (!isNaN(flagsVal)) {
+                                    result.batteryLow = (flagsVal & 0x01) !== 0;
+                                    result.sensorAlert = (flagsVal & 0x02) !== 0;
+                                    result.hasFlags = true;
+                                }
+                                let b0 = parseInt(clean.substr(idx + 12, 2), 16);
+                                let b1 = parseInt(clean.substr(idx + 14, 2), 16);
+                                if (!isNaN(b0) && !isNaN(b1)) {
+                                    result.wakeCycleCounter = b0 | (b1 << 8);
+                                }
+                            } else if (mfgLen === 4) {
+                                let gpioVal = parseInt(clean.substr(idx + 8, 2), 16);
+                                if (!isNaN(gpioVal)) {
+                                    result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                                }
+                                let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
+                                if (!isNaN(flagsVal)) {
+                                    result.batteryLow = (flagsVal & 0x01) !== 0;
+                                    result.sensorAlert = (flagsVal & 0x02) !== 0;
+                                    result.hasFlags = true;
+                                }
                             }
-                        } else if (mfgLen === 6) {
-                            // Scan Response Payload: Company ID (2B: FFFF) + wake_cycle_counter (2B uint16 LE) + reserved (2B)
-                            let b0 = parseInt(clean.substr(idx + 8, 2), 16);
-                            let b1 = parseInt(clean.substr(idx + 10, 2), 16);
-                            if (!isNaN(b0) && !isNaN(b1)) {
-                                result.wakeCycleCounter = b0 | (b1 << 8);
-                            }
-                        } else if (mfgLen > 4) {
-                            let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
-                            if (!isNaN(flagsVal)) {
-                                result.batteryLow = (flagsVal & 0x01) !== 0;
-                                result.sensorAlert = (flagsVal & 0x02) !== 0;
-                                result.hasFlags = true;
+                        } else {
+                            // Old format
+                            if (mfgLen === 4) { 
+                                // Main Advertising Payload: Company ID (2B: FFFF) + GPIO18 status (1B) + Status Flags (1B)
+                                let gpioVal = parseInt(clean.substr(idx + 8, 2), 16);
+                                if (!isNaN(gpioVal)) {
+                                    result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                                }
+                                let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
+                                if (!isNaN(flagsVal)) {
+                                    result.batteryLow = (flagsVal & 0x01) !== 0;
+                                    result.sensorAlert = (flagsVal & 0x02) !== 0;
+                                    result.hasFlags = true;
+                                }
+                            } else if (mfgLen === 6) {
+                                // Scan Response Payload: Company ID (2B: FFFF) + wake_cycle_counter (2B uint16 LE) + reserved (2B)
+                                let b0 = parseInt(clean.substr(idx + 8, 2), 16);
+                                let b1 = parseInt(clean.substr(idx + 10, 2), 16);
+                                if (!isNaN(b0) && !isNaN(b1)) {
+                                    result.wakeCycleCounter = b0 | (b1 << 8);
+                                }
+                            } else if (mfgLen > 4) {
+                                let gpioVal = parseInt(clean.substr(idx + 8, 2), 16);
+                                if (!isNaN(gpioVal)) {
+                                    result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                                }
+                                let flagsVal = parseInt(clean.substr(idx + 10, 2), 16);
+                                if (!isNaN(flagsVal)) {
+                                    result.batteryLow = (flagsVal & 0x01) !== 0;
+                                    result.sensorAlert = (flagsVal & 0x02) !== 0;
+                                    result.hasFlags = true;
+                                }
                             }
                         }
                     }
@@ -3789,18 +4245,53 @@
                     hexToParse = hexToParse.substring(4);
                 }
 
-                if (hexToParse.length === 4) { // 2 bytes payload: GPIO (1B) + Flags (1B)
-                    let flagsVal = parseInt(hexToParse.substr(2, 2), 16);
-                    if (!isNaN(flagsVal)) {
-                        result.batteryLow = (flagsVal & 0x01) !== 0;
-                        result.sensorAlert = (flagsVal & 0x02) !== 0;
-                        result.hasFlags = true;
+                if (isNewFw) {
+                    if (hexToParse.length === 8) { // 4 bytes payload: GPIO (1B) + Flags (1B) + wake_cycle (2B LE)
+                        let gpioVal = parseInt(hexToParse.substr(0, 2), 16);
+                        if (!isNaN(gpioVal)) {
+                            result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                        }
+                        let flagsVal = parseInt(hexToParse.substr(2, 2), 16);
+                        if (!isNaN(flagsVal)) {
+                            result.batteryLow = (flagsVal & 0x01) !== 0;
+                            result.sensorAlert = (flagsVal & 0x02) !== 0;
+                            result.hasFlags = true;
+                        }
+                        let b0 = parseInt(hexToParse.substr(4, 2), 16);
+                        let b1 = parseInt(hexToParse.substr(6, 2), 16);
+                        if (!isNaN(b0) && !isNaN(b1)) {
+                            result.wakeCycleCounter = b0 | (b1 << 8);
+                        }
+                    } else if (hexToParse.length === 4) {
+                        let gpioVal = parseInt(hexToParse.substr(0, 2), 16);
+                        if (!isNaN(gpioVal)) {
+                            result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                        }
+                        let flagsVal = parseInt(hexToParse.substr(2, 2), 16);
+                        if (!isNaN(flagsVal)) {
+                            result.batteryLow = (flagsVal & 0x01) !== 0;
+                            result.sensorAlert = (flagsVal & 0x02) !== 0;
+                            result.hasFlags = true;
+                        }
                     }
-                } else if (hexToParse.length === 8) { // 4 bytes payload: wake_cycle (2B uint16 LE) + reserved (2B)
-                    let b0 = parseInt(hexToParse.substr(0, 2), 16);
-                    let b1 = parseInt(hexToParse.substr(2, 2), 16);
-                    if (!isNaN(b0) && !isNaN(b1)) {
-                        result.wakeCycleCounter = b0 | (b1 << 8);
+                } else {
+                    if (hexToParse.length === 4) { // 2 bytes payload: GPIO (1B) + Flags (1B)
+                        let gpioVal = parseInt(hexToParse.substr(0, 2), 16);
+                        if (!isNaN(gpioVal)) {
+                            result.gpioStatus = (gpioVal === 1) ? 1 : 0;
+                        }
+                        let flagsVal = parseInt(hexToParse.substr(2, 2), 16);
+                        if (!isNaN(flagsVal)) {
+                            result.batteryLow = (flagsVal & 0x01) !== 0;
+                            result.sensorAlert = (flagsVal & 0x02) !== 0;
+                            result.hasFlags = true;
+                        }
+                    } else if (hexToParse.length === 8) { // 4 bytes payload: wake_cycle (2B uint16 LE) + reserved (2B)
+                        let b0 = parseInt(hexToParse.substr(0, 2), 16);
+                        let b1 = parseInt(hexToParse.substr(2, 2), 16);
+                        if (!isNaN(b0) && !isNaN(b1)) {
+                            result.wakeCycleCounter = b0 | (b1 << 8);
+                        }
                     }
                 }
             } catch (e) {
@@ -3810,6 +4301,32 @@
         }
 
         let currentGatewayMode = 'sim';
+
+        // Extract Complete Local Name (type 0x09) or Shortened Local Name (type 0x08) from raw hex data
+        function extractLocalName(hexData) {
+            if (!hexData) return "";
+            let clean = String(hexData).replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+            try {
+                let idx = 0;
+                while (idx < clean.length - 3) {
+                    let len = parseInt(clean.substr(idx, 2), 16);
+                    if (isNaN(len) || len === 0 || idx + (len + 1) * 2 > clean.length) break;
+                    let type = clean.substr(idx + 2, 2);
+                    if (type === "09" || type === "08") {
+                        let nameHex = clean.substr(idx + 4, (len - 1) * 2);
+                        let nameStr = "";
+                        for (let i = 0; i < nameHex.length; i += 2) {
+                            nameStr += String.fromCharCode(parseInt(nameHex.substr(i, 2), 16));
+                        }
+                        return nameStr.trim();
+                    }
+                    idx += (len + 1) * 2;
+                }
+            } catch (e) {
+                console.error("Error extracting local name:", e);
+            }
+            return "";
+        }
 
         // Process incoming messages to populate activeDevices
         function processDashboardMessage(topic, payloadStr) {
@@ -3846,17 +4363,8 @@
             }
 
             if (topicGwid && topicGwid !== '#' && topicGwid !== '+') {
-                const gwMac = topicGwid.replace(/^NMGW2601-/i, '').replace(/:/g, '').toUpperCase();
+                const gwMac = topicGwid.replace(/^NMGW2601-/i, '').replace(/[:-]/g, '').toUpperCase();
                 const gwName = topicGwid.toUpperCase().startsWith("NMGW2601-") ? topicGwid.toUpperCase() : `NMGW2601-${topicGwid}`;
-                if (typeof processScannerPacket === 'function') {
-                    processScannerPacket({
-                        mac: gwMac,
-                        name: gwName,
-                        isGateway: true,
-                        rssi: (parsedObj && parsedObj.wifi_rssi) ? parseInt(parsedObj.wifi_rssi) : -50,
-                        data: ""
-                    });
-                }
 
                 // PC Workstation MQTT Gateway Registry & FW Version Extractor
                 if (typeof pcappMqttGateways !== 'undefined') {
@@ -3932,11 +4440,15 @@
             logsArray.forEach(item => {
                 if (!item.mac) return;
                 
-                const mac = item.mac.replace(/:/g, '').toUpperCase();
+                const mac = item.mac.replace(/[:-]/g, '').toUpperCase();
+                if (removedDevices.has(mac)) {
+                    return;
+                }
                 
+                const rawData = item.data || item.raw_payload || "";
                 let isGwDevice = (item.isGateway === true) || (item.name && item.name.toUpperCase().startsWith("NMGW2601-"));
-                let name = item.name || (isGwDevice ? `NMGW2601-${mac}` : `MEDFLO-${mac}`);
-                const gwid = item.gwid || item.gateway_id || (topicGwid || 'N/A');
+                let name = item.name || extractLocalName(rawData) || (isGwDevice ? `NMGW2601-${mac}` : `MEDFLO-${mac}`);
+                const gwid = item.gwid || item.gateway_id || (parsedObj && parsedObj.gateway_id) || (topicGwid || 'N/A');
                 const isSimGw = (gwid && gwid.toUpperCase().includes("PC_SIM")) || (topic && topic.includes("pc_sim"));
 
                 if (currentGatewayMode === 'real' && isSimGw) {
@@ -3944,11 +4456,12 @@
                 }
 
                 const rssi = parseInt(item.rssi) || -100;
-                const stat = (item.stat !== undefined) ? parseInt(item.stat) : (item.status !== undefined ? parseInt(item.status) : 1);
+                const isNewFw = name.toUpperCase().startsWith("MFL-") || name.toUpperCase().startsWith("MFS-");
+                const bleInfo = parseBleData(rawData, isNewFw);
+                const parsedGpio = bleInfo.gpioStatus;
+                const stat = (parsedGpio !== null && parsedGpio !== undefined) ? parsedGpio :
+                             ((item.stat !== undefined) ? parseInt(item.stat) : (item.status !== undefined ? parseInt(item.status) : 1));
                 const cnt = (item.cnt !== undefined) ? parseInt(item.cnt) : (item.counter !== undefined ? parseInt(item.counter) : 0);
-                const rawData = item.data || "";
-
-                const bleInfo = parseBleData(rawData);
                 let prevWake = activeDevices[mac] ? activeDevices[mac].wakeCycleCounter : null;
                 let wakeCycleVal = (bleInfo.wakeCycleCounter !== null && bleInfo.wakeCycleCounter !== undefined) 
                     ? bleInfo.wakeCycleCounter 
@@ -4022,8 +4535,7 @@
                     if (intervalMs > globalPeakMaxIntervalMs) {
                         globalPeakMaxIntervalMs = intervalMs;
                         globalPeakSlowestDevName = name || dev.name || mac;
-                        savePeakUpdateInterval();
-                    }
+}
                 }
 
                 dev.name = name;
@@ -4067,39 +4579,17 @@
                 });
                 if (dev.telemetryLogs.length > 30) dev.telemetryLogs.pop();
 
-                // Maintain rolling 20 packet buffer for 75% threshold state fault tolerance
+                // Maintain rolling 20 packet buffer (for statistics in modal)
                 if (!dev.recentStatHistory) dev.recentStatHistory = [];
                 dev.recentStatHistory.push(stat);
                 if (dev.recentStatHistory.length > 20) dev.recentStatHistory.shift();
 
-                // Calculate 75% Ratio Evaluation
-                const windowSize = dev.recentStatHistory.length;
-                const fullInWindow = dev.recentStatHistory.filter(s => s === 0).length;
-                const emptyInWindow = dev.recentStatHistory.filter(s => s === 1).length;
-                const fullRatio = windowSize > 0 ? (fullInWindow / windowSize) : 0;
-                const emptyRatio = windowSize > 0 ? (emptyInWindow / windowSize) : 0;
-
-                // 20-packet Sampling Rule (收集不到 20 筆時，兩欄皆不亮)
-                if (windowSize < 20) {
-                    dev.confirmedState = -1; // -1 means Sampling / Initializing (< 20 pkts)
-                } else {
-                    // Reached 20 packets: Apply 75% Threshold Rule
-                    if (fullRatio >= 0.75) {
-                        if (dev.confirmedState !== 0) {
-                            dev.confirmedState = 0; // Confirmed FULL!
-                            dev.dripFullCount = (dev.dripFullCount || 0) + 1;
-                        }
-                    } else if (emptyRatio >= 0.75) {
-                        if (dev.confirmedState !== 1) {
-                            dev.confirmedState = 1; // Confirmed EMPTY!
-                        }
-                    } else if (dev.confirmedState === -1) {
-                        // Reached 20 pkts for first time, if neither hit 75%, pick majority
-                        dev.confirmedState = (fullRatio >= emptyRatio) ? 0 : 1;
-                        if (dev.confirmedState === 0 && (!dev.dripFullCount || dev.dripFullCount === 0)) {
-                            dev.dripFullCount = 1;
-                        }
+                // Update state directly from packet's stat value (removing 20-packet 75% condition)
+                if (dev.confirmedState !== stat) {
+                    if (stat === 0) {
+                        dev.dripFullCount = (dev.dripFullCount || 0) + 1;
                     }
+                    dev.confirmedState = stat;
                 }
 
                 if (!dev.gateways) dev.gateways = {};
@@ -4119,10 +4609,6 @@
                 }
 
                 updatedAny = true;
-
-                if (typeof processScannerPacket === 'function') {
-                    processScannerPacket(item);
-                }
             });
 
             if (updatedAny) {
@@ -4130,14 +4616,128 @@
             }
         }
 
-        // Throttled render function to prevent DOM thrashing and window freeze
+        // Throttled render function & decoupled saving to prevent DOM thrashing and window freeze
+        let saveDevicesTimer = null;
+        function scheduleDevicesSave() {
+            if (saveDevicesTimer) return;
+            saveDevicesTimer = setTimeout(() => {
+                saveDevicesTimer = null;
+                saveActiveDevices();
+            }, 5000); // 5秒存檔一次即可，避免高頻寫入硬碟卡死 JavaScript 線程
+        }
+
         function scheduleDevicesGridRender() {
             if (renderDevicesTimer) return;
             renderDevicesTimer = setTimeout(() => {
                 renderDevicesTimer = null;
-                saveActiveDevices();
                 renderDevicesGrid();
-            }, 100); // 100ms throttle (max 10 localStorage writes + DOM redraws per sec)
+                scheduleDevicesSave();
+            }, 100); // 100ms throttle
+        }
+
+        // Render device cards into the center panel grid
+        function getDeviceExtendedState(dev, now) {
+            const startMs = dev.firstSeenMs || DEFAULT_FORCED_ONLINE_MS;
+            const elapsedMs = now - startMs;
+            const isServiceExpired = elapsedMs >= (168 * 3600 * 1000); // 168 hours (7 days)
+            const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
+
+            // 1. Service expired checks (>= 168 hours)
+            if (isServiceExpired) {
+                const elapsedMin = elapsedMs / (60 * 1000);
+                const limitMin = 168 * 60; // 10080 minutes
+                
+                if (elapsedMin < limitMin + 30) { // first 30 minutes after expiration
+                    return {
+                        stateCode: 'service-terminated',
+                        label: '服務中止',
+                        color: '#c084fc', // purple
+                        badgeBg: 'rgba(167, 139, 250, 0.15)',
+                        badgeBorder: 'rgba(167, 139, 250, 0.35)',
+                        bgClass: 'state-service-terminated',
+                        isOffline: true,
+                        sortWeight: 70 // 服務中止 (Weight = 70)
+                    };
+                } else if (elapsedMin < limitMin + 90) { // from 30 to 90 minutes (1 hour cooling period)
+                    return {
+                        stateCode: 'cooling-down',
+                        label: '冷卻中',
+                        color: '#60a5fa', // Blue
+                        badgeBg: 'rgba(96, 165, 250, 0.15)',
+                        badgeBorder: 'rgba(96, 165, 250, 0.3)',
+                        bgClass: 'state-cooling-down',
+                        isOffline: true, // Force offline/grayed out
+                        sortWeight: 60 // 冷卻中 (Weight = 60)
+                    };
+                } else {
+                    // Beyond 90 minutes after expiration: waiting state
+                    return {
+                        stateCode: 'waiting-offline',
+                        label: '等待中',
+                        color: '#94a3b8', // Gray
+                        badgeBg: 'rgba(255, 255, 255, 0.06)',
+                        badgeBorder: 'rgba(255, 255, 255, 0.15)',
+                        bgClass: 'state-waiting-offline',
+                        isOffline: true,
+                        sortWeight: 50 // 等待中 (Weight = 50)
+                    };
+                }
+            }
+
+            // 2. Active period checks (< 168 hours)
+            const isOffline = secondsAgo > 40;
+            if (isOffline) {
+                return {
+                    stateCode: 'offline-anomaly',
+                    label: '斷線異常',
+                    color: '#ef4444', // Vivid Red
+                    badgeBg: 'rgba(239, 68, 68, 0.25)',
+                    badgeBorder: 'rgba(239, 68, 68, 0.55)',
+                    bgClass: 'state-offline-anomaly',
+                    isOffline: true,
+                    sortWeight: 40 // 服務中 - 斷線異常 (Weight = 40)
+                };
+            }
+
+            // Online & within service time
+            const isSampling = (dev.confirmedState === undefined || dev.confirmedState === -1);
+            if (isSampling) {
+                return {
+                    stateCode: 'sampling',
+                    label: '採集中',
+                    color: 'var(--accent-yellow)',
+                    badgeBg: 'rgba(245, 158, 11, 0.15)',
+                    badgeBorder: 'rgba(245, 158, 11, 0.35)',
+                    bgClass: 'state-sampling',
+                    isOffline: false,
+                    sortWeight: 30 // 服務中 - 採集中 (Weight = 30)
+                };
+            }
+
+            const isFull = dev.confirmedState === 0;
+            if (isFull) {
+                return {
+                    stateCode: 'full',
+                    label: '尿袋滿',
+                    color: '#fca5a5',
+                    badgeBg: 'rgba(239, 68, 68, 0.2)',
+                    badgeBorder: 'rgba(239, 68, 68, 0.4)',
+                    bgClass: 'state-full',
+                    isOffline: false,
+                    sortWeight: 10 // 服務中 - 尿袋滿 (Weight = 10)
+                };
+            } else {
+                return {
+                    stateCode: 'empty',
+                    label: '尿袋空',
+                    color: 'var(--accent-green)',
+                    badgeBg: 'rgba(16, 185, 129, 0.15)',
+                    badgeBorder: 'rgba(16, 185, 129, 0.35)',
+                    bgClass: 'state-empty',
+                    isOffline: false,
+                    sortWeight: 20 // 服務中 - 尿袋空 (Weight = 20)
+                };
+            }
         }
 
         // Render device cards into the center panel grid
@@ -4156,12 +4756,24 @@
             // PC 模擬 Gateway 模式：將 PC 找到的 BT 放在卡片最前面，實體 Gateway 排在後面
             // 實體 Gateway 模式：依照最新收到時間排序
             devicesList.sort((a, b) => {
+                const nowTime = Date.now();
+                const stateA = getDeviceExtendedState(a, nowTime);
+                const stateB = getDeviceExtendedState(b, nowTime);
+                
+                // 1. Sort by state sortWeight (lower weight appears first)
+                if (stateA.sortWeight !== stateB.sortWeight) {
+                    return stateA.sortWeight - stateB.sortWeight;
+                }
+                
+                // 2. Secondary sort: simulator placement if in sim mode
                 if (currentGatewayMode === 'sim') {
                     const aIsSim = (a.gwid && a.gwid.toUpperCase().includes("PC_SIM")) || (a.topic && a.topic.includes("pc_sim"));
                     const bIsSim = (b.gwid && b.gwid.toUpperCase().includes("PC_SIM")) || (b.topic && b.topic.includes("pc_sim"));
                     if (aIsSim && !bIsSim) return -1;
                     if (!aIsSim && bIsSim) return 1;
                 }
+                
+                // 3. Alphabetical name sorting
                 return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
             });
             
@@ -4184,180 +4796,354 @@
             const now = Date.now();
             let onlineCount = 0;
 
-            let html = "";
-            devicesList.forEach(dev => {
-                const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
-                if (secondsAgo > 180) { // 超過 3 分鐘 (180 秒) 未收到數據才自動清除舊卡片
-                    delete activeDevices[dev.mac];
-                    return;
-                }
-                const isOffline = secondsAgo > 40;
-                if (!isOffline) onlineCount++;
+            if (currentDashboardViewMode === 'card') {
+                // Count online devices first across the entire list
+                devicesList.forEach(dev => {
+                    const extState = getDeviceExtendedState(dev, now);
+                    if (!extState.isOffline) onlineCount++;
+                });
 
-                // RSSI Bars
-                let rssiBarsHtml = "";
-                let rssiBarsCount = 0;
-                if (dev.rssi > -65) rssiBarsCount = 4;
-                else if (dev.rssi > -78) rssiBarsCount = 3;
-                else if (dev.rssi > -90) rssiBarsCount = 2;
-                else if (dev.rssi > -105) rssiBarsCount = 1;
-                
-                for (let k = 1; k <= 4; k++) {
-                    const isFilled = k <= rssiBarsCount;
-                    rssiBarsHtml += `<span class="rssi-bar ${isFilled ? 'filled' : ''}"></span>`;
-                }
+                const totalPages = Math.ceil(devicesList.length / DEVICES_PER_PAGE) || 1;
+                if (currentDevicesPage > totalPages) currentDevicesPage = totalPages;
+                if (currentDevicesPage < 1) currentDevicesPage = 1;
 
-                // Gateway Source Tag
-                const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
-                const gwTagHtml = isSimGw
-                    ? `<span style="font-size: 0.65rem; color: #10B981; font-weight: 600; background: rgba(16,185,129,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(16,185,129,0.25);">💻 PC模擬: ${dev.gwid || 'pc_sim'}</span>`
-                    : `<span style="font-size: 0.65rem; color: #06B6D4; font-weight: 600; background: rgba(6,182,212,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(6,182,212,0.25);">📡 實體GW: ${dev.gwid || 'GW202601'}</span>`;
+                const pageDevices = devicesList.slice((currentDevicesPage - 1) * DEVICES_PER_PAGE, currentDevicesPage * DEVICES_PER_PAGE);
 
-                // Drip Dual Status Block (Top: 尿袋滿/GPO=0 with counter, Bottom: 尿袋空/GPO=1 Left-Aligned)
-                // Rule: < 20 packets collected -> dev.confirmedState === -1 (Neither is lit!)
-                const windowLen = (dev.recentStatHistory || []).length;
-                const isSampling = windowLen < 20 || dev.confirmedState === -1;
-                const isFull = !isSampling && dev.confirmedState === 0;
-                const isEmpty = !isSampling && dev.confirmedState === 1;
-                const fullCount = dev.dripFullCount || 0;
+                let html = "";
+                pageDevices.forEach(dev => {
+                    const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
+                    const extState = getDeviceExtendedState(dev, now);
 
-                // SVG Medical Urine Drainage Bag Icons
-                const fullBagIconSvg = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; flex-shrink: 0; filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.5));">
-                        <path d="M12 2V5M9 5H15" stroke="#FDE047" stroke-width="1.8" stroke-linecap="round"/>
-                        <path d="M7 6C6.4 6 6 6.4 6 7V16C6 17.7 7.3 19 9 19H15C16.7 19 18 17.7 18 16V7C18 6.4 17.6 6 17 6H7Z" fill="rgba(253, 224, 71, 0.25)" stroke="#FDE047" stroke-width="1.5"/>
-                        <path d="M7 10.5C7 10.5 9 11.5 12 11.5C15 11.5 17 10.5 17 10.5V16C17 17.1 16.1 18 15 18H9C7.9 18 7 17.1 7 16V10.5Z" fill="#FDE047"/>
-                        <path d="M12 19V22M10.5 22H13.5" stroke="#FDE047" stroke-width="1.6" stroke-linecap="round"/>
-                    </svg>`;
+                    // RSSI Bars
+                    let rssiBarsHtml = "";
+                    let rssiBarsCount = 0;
+                    if (dev.rssi > -65) rssiBarsCount = 4;
+                    else if (dev.rssi > -78) rssiBarsCount = 3;
+                    else if (dev.rssi > -90) rssiBarsCount = 2;
+                    else if (dev.rssi > -105) rssiBarsCount = 1;
+                    
+                    for (let k = 1; k <= 4; k++) {
+                        const isFilled = k <= rssiBarsCount;
+                        rssiBarsHtml += `<span class="rssi-bar ${isFilled ? 'filled' : ''}"></span>`;
+                    }
 
-                const emptyBagIconSvg = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; flex-shrink: 0;">
-                        <path d="M12 2V5M9 5H15" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/>
-                        <path d="M7 6C6.4 6 6 6.4 6 7V16C6 17.7 7.3 19 9 19H15C16.7 19 18 17.7 18 16V7C18 6.4 17.6 6 17 6H7Z" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-                        <path d="M7 14.5C7 14.5 9 15 12 15C15 15 17 14.5 17 14.5V16C17 17.1 16.1 18 15 18H9C7.9 18 7 17.1 7 16V14.5Z" fill="rgba(255, 255, 255, 0.50)"/>
-                        <path d="M12 19V22M10.5 22H13.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.6" stroke-linecap="round"/>
-                    </svg>`;
+                    // Gateway Source Tag
+                    const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
+                    const gwTagHtml = isSimGw
+                        ? `<span style="font-size: 0.65rem; color: #10B981; font-weight: 600; background: rgba(16,185,129,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(16,185,129,0.25);">💻 PC模擬: ${dev.gwid || 'pc_sim'}</span>`
+                        : `<span style="font-size: 0.65rem; color: #06B6D4; font-weight: 600; background: rgba(6,182,212,0.1); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(6,182,212,0.25);">📡 實體GW: ${dev.gwid || 'GW202601'}</span>`;
 
-                const statusHtml = `
-                    <div style="display: flex; flex-direction: column; gap: 0.35rem; margin: 0.15rem 0;">
-                        <!-- 上面: 尿袋滿 (GPO=0) + 計數器 (點擊開啟最近 30 筆 Log 與 Gateway 報出路徑) -->
-                        <div class="status-indicator drip ${isFull ? 'active-full' : 'muted'}" onclick="event.stopPropagation(); openBtDripLogsModal('${dev.mac}')" title="點擊檢視最近 30 筆報出 Gateway 路徑 Log 與 75% 容錯評估" style="${isFull ? 'background: rgba(234, 179, 8, 0.14); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.45);' : 'background: rgba(30, 41, 59, 0.35); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); opacity: 0.55;'} font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                ${fullBagIconSvg}
-                                <span style="${isFull ? 'font-weight: 700; color: #fef08a;' : ''}">尿袋滿 (GPO=0)</span>
+                    // Drip Dual Status Block (Top: 尿袋滿/GPO=0 with counter, Bottom: 尿袋空/GPO=1 Left-Aligned)
+                    const isSampling = (dev.confirmedState === undefined || dev.confirmedState === -1);
+                    const isFull = !isSampling && dev.confirmedState === 0;
+                    const fullCount = dev.dripFullCount || 0;
+
+                    // SVG Medical Urine Drainage Bag Icons
+                    const fullBagIconSvg = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; flex-shrink: 0; filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.5));">
+                            <path d="M12 2V5M9 5H15" stroke="#FDE047" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M7 6C6.4 6 6 6.4 6 7V16C6 17.7 7.3 19 9 19H15C16.7 19 18 17.7 18 16V7C18 6.4 17.6 6 17 6H7Z" fill="rgba(253, 224, 71, 0.25)" stroke="#FDE047" stroke-width="1.5"/>
+                            <path d="M7 10.5C7 10.5 9 11.5 12 11.5C15 11.5 17 10.5 17 10.5V16C17 17.1 16.1 18 15 18H9C7.9 18 7 17.1 7 16V10.5Z" fill="#FDE047"/>
+                            <path d="M12 19V22M10.5 22H13.5" stroke="#FDE047" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>`;
+
+                    const emptyBagIconSvg = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; flex-shrink: 0;">
+                            <path d="M12 2V5M9 5H15" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M7 6C6.4 6 6 6.4 6 7V16C6 17.7 7.3 19 9 19H15C16.7 19 18 17.7 18 16V7C18 6.4 17.6 6 17 6H7Z" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+                            <path d="M7 14.5C7 14.5 9 15 12 15C15 15 17 14.5 17 14.5V16C17 17.1 16.1 18 15 18H9C7.9 18 7 17.1 7 16V14.5Z" fill="rgba(255, 255, 255, 0.50)"/>
+                            <path d="M12 19V22M10.5 22H13.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>`;
+
+                    const statusHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 0.35rem; margin: 0.15rem 0;">
+                            <div class="status-indicator drip ${isFull ? 'active-full' : 'muted'}" onclick="event.stopPropagation(); openBtDripLogsModal('${dev.mac}')" title="點擊檢視最近 30 筆報出 Gateway 路徑 Log 與狀態評估" style="${isFull ? 'background: rgba(234, 179, 8, 0.14); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.45);' : 'background: rgba(30, 41, 59, 0.35); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); opacity: 0.55;'} font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                <div style="display: flex; align-items: center; gap: 0.35rem;">
+                                    ${fullBagIconSvg}
+                                    <span style="${isFull ? 'font-weight: 700; color: #fef08a;' : ''}">尿袋滿 (GPO=0)</span>
+                                </div>
+                                <span style="font-family: 'Fira Code', monospace; font-size: 0.72rem; font-weight: 700; background: ${isFull ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255,255,255,0.08)'}; color: ${isFull ? '#fef08a' : 'var(--text-muted)'}; padding: 1px 6px; border-radius: 4px; border: 1px solid ${isFull ? 'rgba(234, 179, 8, 0.4)' : 'transparent'};">累計 ${fullCount} 次</span>
                             </div>
-                            <span style="font-family: 'Fira Code', monospace; font-size: 0.72rem; font-weight: 700; background: ${isFull ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255,255,255,0.08)'}; color: ${isFull ? '#fef08a' : 'var(--text-muted)'}; padding: 1px 6px; border-radius: 4px; border: 1px solid ${isFull ? 'rgba(234, 179, 8, 0.4)' : 'transparent'};">累計 ${fullCount} 次</span>
-                        </div>
 
-                        <!-- 下面: 尿袋空 (GPO=1) 靠左對齊 (點擊開啟最近 30 筆 Log 與 Gateway 報出路徑) -->
-                        <div class="status-indicator idle ${!isFull ? 'active-empty' : 'muted'}" onclick="event.stopPropagation(); openBtDripLogsModal('${dev.mac}')" title="點擊檢視最近 30 筆報出 Gateway 路徑 Log 與 75% 容錯評估" style="${!isFull ? 'background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.35);' : 'background: rgba(30, 41, 59, 0.35); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); opacity: 0.55;'} font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 6px; display: flex; justify-content: flex-start; align-items: center; gap: 0.35rem; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                            ${emptyBagIconSvg}
-                            <span style="${!isFull ? 'font-weight: 700; color: var(--accent-green);' : ''}">尿袋空 (GPO=1)</span>
+                            <div class="status-indicator idle ${!isFull ? 'active-empty' : 'muted'}" onclick="event.stopPropagation(); openBtDripLogsModal('${dev.mac}')" title="點擊檢視最近 30 筆報出 Gateway 路徑 Log 與狀態評估" style="${!isFull ? 'background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.35);' : 'background: rgba(30, 41, 59, 0.35); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); opacity: 0.55;'} font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 6px; display: flex; justify-content: flex-start; align-items: center; gap: 0.35rem; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                ${emptyBagIconSvg}
+                                <span style="${!isFull ? 'font-weight: 700; color: var(--accent-green);' : ''}">尿袋空 (GPO=1)</span>
+                            </div>
                         </div>
-                    </div>
+                    `;
+
+                    // Battery Badge
+                    let batHtml = `<span class="bat-badge ok" style="opacity: 0.6;">🔋 電量正常</span>`;
+
+                    // Alert Badge
+                    let alertHtml = "";
+                    if (dev.sensorAlert) {
+                        alertHtml = `<span class="alert-badge">🚨 感測器異常</span>`;
+                    }
+
+                    // Format Time String
+                    let timeStr = "";
+                    if (secondsAgo < 5) timeStr = "剛剛";
+                    else if (secondsAgo < 60) timeStr = `${secondsAgo}秒前`;
+                    else {
+                        const mins = Math.floor(secondsAgo / 60);
+                        timeStr = `${mins}分鐘前`;
+                    }
+
+                    // Calculate Gateway Redundancy Count
+                    const gwCount = (dev.gateways && Object.keys(dev.gateways).length > 0) ? Object.keys(dev.gateways).length : 1;
+                    const isHighRiskSingleGw = gwCount <= 1;
+
+                    // Parse MQTT Log Time
+                    let logTimeStr = dev.firstSeenTimeStr || DEFAULT_FORCED_ONLINE_STR;
+
+                    // Calculate Operating Uptime (Prefer BT Broadcast Counter: 1 Counter = 30 seconds)
+                    const startMs = dev.firstSeenMs || DEFAULT_FORCED_ONLINE_MS;
+                    const counterSec = (dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null) ? (dev.wakeCycleCounter * 30) : null;
+                    const uptimeSec = counterSec !== null ? counterSec : Math.max(0, Math.floor((now - startMs) / 1000));
+                    const uptimeDisplayStr = formatCounterUptime(uptimeSec);
+                    const isCounterBased = counterSec !== null;
+
+                    // Calculate Service Termination Time
+                    const termMs = startMs + (168 * 3600 * 1000);
+                    const termDate = new Date(termMs);
+                    const termDisplayStr = `${termDate.getMonth() + 1}/${termDate.getDate()} ${String(termDate.getHours()).padStart(2, '0')}:${String(termDate.getMinutes()).padStart(2, '0')}`;
+
+                    const isMedflo = dev.name && (dev.name.toUpperCase().startsWith("MEDFLO-") || dev.name.toUpperCase().startsWith("MFL-") || dev.name.toUpperCase().startsWith("MFS-"));
+                    const isInService = isMedflo && (extState.stateCode === 'sampling' || extState.stateCode === 'full' || extState.stateCode === 'empty');
+                    const showRemoveBtn = !isInService;
+
+                    // Module Type Tag for BT v4 Spec
+                    let devTypeTag = '';
+                    if (dev.name) {
+                        const uname = dev.name.toUpperCase();
+                        if (uname.startsWith("MFL-")) devTypeTag = '<span style="font-size: 0.65rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);" title="Actions ATB1113 大模組測試樣品">AS113 樣品</span>';
+                        else if (uname.startsWith("MFS-")) devTypeTag = '<span style="font-size: 0.65rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);" title="AS112 貼片式醫院正式產品">AS112 貼片</span>';
+                    }
+
+                    html += `
+                        <div class="device-card ${extState.isOffline ? 'offline' : ''} ${extState.bgClass}" onclick="openBtDeviceModal('${dev.mac}')" title="點擊檢視 ${dev.name} 的 Gateway 歷程與工作週期數據">
+                            <div class="card-header">
+                                <div class="device-name-container">
+                                    <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                                        <span class="device-name">${dev.name}</span>
+                                        <span style="font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: ${extState.badgeBg}; color: ${extState.color}; border: 1px solid ${extState.badgeBorder};">${extState.label}</span>
+                                        ${devTypeTag}
+                                    </div>
+                                    <span class="mac-addr">${dev.mac.match(/.{1,2}/g).join(':')}</span>
+                                    <div style="margin-top: 3px;">${gwTagHtml}</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div class="rssi-bar-container" title="RSSI: ${dev.rssi} dBm">
+                                        ${rssiBarsHtml}
+                                    </div>
+                                    ${showRemoveBtn ? `<button class="remove-card-btn" onclick="event.stopPropagation(); removeDeviceCard('${dev.mac}')" title="移除此卡片">✕</button>` : ''}
+                                </div>
+                            </div>
+                            
+                            ${statusHtml}
+                            
+                            ${dev.sensorAlert ? `
+                            <div class="info-row">
+                                <span class="info-label">異常告警</span>
+                                <span class="info-value">${alertHtml}</span>
+                            </div>` : ''}
+
+                            <div class="info-row">
+                                <span class="info-label">喚醒週期</span>
+                                <span class="info-value" style="color: var(--accent-cyan); font-weight: bold;">🔄 ${dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null ? `${dev.wakeCycleCounter} 次 <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal;">(~${((dev.wakeCycleCounter * 30) / 86400).toFixed(1)}天)</span>` : 'N/A'}</span>
+                            </div>
+                            ${dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null && dev.wakeCycleCounter >= 20000 ? `
+                            <div class="info-row" style="background: rgba(245, 158, 11, 0.15); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.4); margin-top: 2px;">
+                                <span class="info-label" style="color: #fbbf24; font-weight: bold;">ℹ️ 換藥提醒</span>
+                                <span class="info-value" style="color: #fbbf24; font-weight: bold;">滿 7 天 (建議更換貼片)</span>
+                            </div>` : ''}
+
+                            <div class="info-row">
+                                <span class="info-label">運作時間</span>
+                                <span class="info-value" style="color: var(--accent-cyan); font-weight: bold;">⏱️ ${uptimeDisplayStr} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 2px;" title="${isCounterBased ? '廣播 Counter 推算 (1 Counter = 30秒)' : 'MQTT 上線時間'}">(${isCounterBased ? 'Counter推算' : logTimeStr})</span></span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">中止時間</span>
+                                <span class="info-value" style="color: var(--accent-yellow); font-weight: bold;" title="上線時間後 168 小時預計中止">⏳ ${termDisplayStr} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 2px;">(滿168h)</span></span>
+                            </div>
+
+                            <div class="info-row" style="margin-top: 0.25rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem; font-size: 0.75rem;">
+                                <span class="info-label" style="color: ${extState.color}; font-weight: ${extState.stateCode === 'offline-anomaly' ? 'bold' : 'normal'};">${extState.isOffline ? `❌ ${extState.label}` : '⚡ 狀態活躍'}</span>
+                                <span class="info-value" style="color: var(--text-muted); font-weight: normal;">更新於 ${timeStr}</span>
+                            </div>
+
+                            <div style="margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px dashed rgba(255, 255, 255, 0.08); font-size: 0.67rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+                                <span>💡 10分無訊號/168小時滿期終止</span>
+                                ${isHighRiskSingleGw
+                                    ? `<span style="color: var(--accent-red); font-weight: 800; background: rgba(239, 68, 68, 0.15); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3);">🚨 高危險無備援 (1台) ›</span>`
+                                    : `<span style="color: var(--accent-cyan); font-weight: 600;">🔍 Gateway 歷程 (${gwCount}台) ›</span>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+
+                grid.innerHTML = html;
+
+                if (totalPages > 1) {
+                    grid.innerHTML += `
+                        <div class="pagination-bar" style="display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:1rem; font-size:0.8rem; color:var(--text-muted); width:100%;">
+                            <button onclick="event.stopPropagation(); changeDevicesPage(-1)" ${currentDevicesPage === 1 ? 'disabled' : ''} style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-main); padding:4px 12px; border-radius:4px; cursor:pointer;">上一頁</button>
+                            <span>第 ${currentDevicesPage} / ${totalPages} 頁 (共 ${devicesList.length} 個裝置)</span>
+                            <button onclick="event.stopPropagation(); changeDevicesPage(1)" ${currentDevicesPage === totalPages ? 'disabled' : ''} style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-main); padding:4px 12px; border-radius:4px; cursor:pointer;">下一頁</button>
+                        </div>
+                    `;
+                }
+            } else if (currentDashboardViewMode === 'table') {
+                // Table Rendering with Pagination
+                devicesList.forEach(dev => {
+                    const extState = getDeviceExtendedState(dev, now);
+                    if (!extState.isOffline) onlineCount++;
+                });
+
+                const totalPages = Math.ceil(devicesList.length / DEVICES_PER_PAGE) || 1;
+                if (currentDevicesPage > totalPages) currentDevicesPage = totalPages;
+                if (currentDevicesPage < 1) currentDevicesPage = 1;
+
+                const pageDevices = devicesList.slice((currentDevicesPage - 1) * DEVICES_PER_PAGE, currentDevicesPage * DEVICES_PER_PAGE);
+
+                let tableHtml = `
+                    <table class="compact-table">
+                        <thead>
+                            <tr>
+                                <th>裝置名稱 (MAC)</th>
+                                <th>網關來源</th>
+                                <th>點滴/尿袋狀態</th>
+                                <th>告警/電量</th>
+                                <th>喚醒週期(天數)</th>
+                                <th>已上線時間</th>
+                                <th>漫遊/訊號</th>
+                                <th>更新時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
 
-                // Battery Badge
-                let batHtml = "";
-                if (dev.hasFlags) {
-                    batHtml = dev.batteryLow
-                        ? `<span class="bat-badge low">⚠️ 低電量</span>`
-                        : `<span class="bat-badge ok">🔋 電量正常</span>`;
-                } else {
-                    batHtml = `<span class="bat-badge ok" style="opacity: 0.6;">🔋 電量正常</span>`;
-                }
+                pageDevices.forEach(dev => {
+                    const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
+                    const extState = getDeviceExtendedState(dev, now);
+                    
+                    const macFormatted = dev.mac.match(/.{1,2}/g).join(':');
+                    const isSimGw = (dev.gwid && dev.gwid.toUpperCase().includes("PC_SIM")) || (dev.topic && dev.topic.includes("pc_sim"));
+                    const gwText = isSimGw ? `💻 PC模擬 (${dev.gwid || 'sim'})` : `📡 實體GW (${dev.gwid || 'N/A'})`;
 
-                // Alert Badge
-                let alertHtml = "";
-                if (dev.sensorAlert) {
-                    alertHtml = `<span class="alert-badge">🚨 感測器異常</span>`;
-                }
+                    let stateText = extState.label;
+                    if (extState.stateCode === 'full') {
+                        stateText = `🔴 尿袋滿 (已滿 ${dev.dripFullCount || 0}次)`;
+                    } else if (extState.stateCode === 'empty') {
+                        stateText = `🟢 尿袋空`;
+                    } else if (extState.stateCode === 'sampling') {
+                        stateText = `🟡 採集中 (<20筆)`;
+                    } else if (extState.stateCode === 'offline-anomaly') {
+                        stateText = `❌ 斷線異常`;
+                    } else if (extState.stateCode === 'service-terminated') {
+                        stateText = `⏳ 服務中止`;
+                    } else if (extState.stateCode === 'cooling-down') {
+                        stateText = `❄️ 冷卻中`;
+                    } else if (extState.stateCode === 'waiting-offline') {
+                        stateText = `💤 等待中`;
+                    }
 
-                // Format Time String
-                let timeStr = "";
-                if (secondsAgo < 5) timeStr = "剛剛";
-                else if (secondsAgo < 60) timeStr = `${secondsAgo}秒前`;
-                else {
-                    const mins = Math.floor(secondsAgo / 60);
-                    timeStr = `${mins}分鐘前`;
-                }
+                    let alertText = "🔋 正常";
+                    let alertColor = "var(--accent-green)";
+                    if (dev.sensorAlert) {
+                        alertText = "🚨 異常";
+                        alertColor = "var(--accent-red)";
+                    }
 
-                        // Calculate Gateway Redundancy Count
-                        const gwCount = (dev.gateways && Object.keys(dev.gateways).length > 0) ? Object.keys(dev.gateways).length : 1;
-                        const isHighRiskSingleGw = gwCount <= 1;
+                    const startMs = dev.firstSeenMs || DEFAULT_FORCED_ONLINE_MS;
+                    const counterSec = (dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null) ? (dev.wakeCycleCounter * 30) : null;
+                    const uptimeSec = counterSec !== null ? counterSec : Math.max(0, Math.floor((now - startMs) / 1000));
+                    const uptimeStr = formatCounterUptime(uptimeSec);
 
-                        // Parse MQTT Log Time
-                        let logTimeStr = dev.firstSeenTimeStr || DEFAULT_FORCED_ONLINE_STR;
+                    const gwCount = (dev.gateways && Object.keys(dev.gateways).length > 0) ? Object.keys(dev.gateways).length : 1;
+                    const rssiText = `${dev.rssi} dBm`;
 
-                        // Calculate Online Uptime (從 MQTT 最近上線且未斷線>10分鐘的累計時間)
-                        const startMs = dev.firstSeenMs || DEFAULT_FORCED_ONLINE_MS;
-                        const uptimeSec = Math.max(0, Math.floor((now - startMs) / 1000));
-                        let uptimeDisplayStr = "";
-                        if (uptimeSec < 60) {
-                            uptimeDisplayStr = `${uptimeSec}秒`;
-                        } else if (uptimeSec < 3600) {
-                            const mins = Math.floor(uptimeSec / 60);
-                            const secs = uptimeSec % 60;
-                            uptimeDisplayStr = `${mins}分 ${secs}秒`;
-                        } else {
-                            const hrs = Math.floor(uptimeSec / 3600);
-                            const mins = Math.floor((uptimeSec % 3600) / 60);
-                            uptimeDisplayStr = `${hrs}小時 ${mins}分`;
-                        }
+                    let lastSeenText = "";
+                    if (secondsAgo < 5) lastSeenText = "剛剛";
+                    else if (secondsAgo < 60) lastSeenText = `${secondsAgo}秒前`;
+                    else lastSeenText = `${Math.floor(secondsAgo / 60)}分前`;
 
-                        // Calculate Service Termination Time (上線時間後的 168 小時)
-                        const termMs = startMs + (168 * 3600 * 1000);
-                        const termDate = new Date(termMs);
-                        const termDisplayStr = `${termDate.getMonth() + 1}/${termDate.getDate()} ${String(termDate.getHours()).padStart(2, '0')}:${String(termDate.getMinutes()).padStart(2, '0')}`;
+                    const isMedflo = dev.name && (dev.name.toUpperCase().startsWith("MEDFLO-") || dev.name.toUpperCase().startsWith("MFL-") || dev.name.toUpperCase().startsWith("MFS-"));
+                    const isInService = isMedflo && (extState.stateCode === 'sampling' || extState.stateCode === 'full' || extState.stateCode === 'empty');
+                    const showRemoveBtn = !isInService;
 
-                        html += `
-                    <div class="device-card ${isOffline ? 'offline' : ''}" onclick="openBtDeviceModal('${dev.mac}')" title="點擊檢視 ${dev.name} 的 Gateway 歷程與工作週期數據">
-                        <div class="card-header">
-                            <div class="device-name-container">
-                                <span class="device-name">${dev.name}</span>
-                                <span class="mac-addr">${dev.mac.match(/.{1,2}/g).join(':')}</span>
-                                <div style="margin-top: 3px;">${gwTagHtml}</div>
-                            </div>
-                            <div class="rssi-bar-container" title="RSSI: ${dev.rssi} dBm">
-                                ${rssiBarsHtml}
-                            </div>
-                        </div>
-                        
-                        ${statusHtml}
-                        
-                        ${dev.sensorAlert ? `
-                        <div class="info-row">
-                            <span class="info-label">異常告警</span>
-                            <span class="info-value">${alertHtml}</span>
-                        </div>` : ''}
+                    tableHtml += `
+                        <tr class="${extState.isOffline ? 'offline-row' : ''}" onclick="openBtDeviceModal('${dev.mac}')">
+                            <td>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <strong style="color: var(--text-main); font-size:0.85rem;">${dev.name}</strong>
+                                    ${dev.name && dev.name.toUpperCase().startsWith("MFL-") ? '<span style="font-size:0.6rem; background:rgba(59,130,246,0.2); color:#60a5fa; padding:1px 4px; border-radius:3px;">AS113</span>' : ''}
+                                    ${dev.name && dev.name.toUpperCase().startsWith("MFS-") ? '<span style="font-size:0.6rem; background:rgba(16,185,129,0.2); color:#34d399; padding:1px 4px; border-radius:3px;">AS112</span>' : ''}
+                                </div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); font-family:monospace; margin-top:2px;">${macFormatted}</div>
+                            </td>
+                            <td style="font-size:0.76rem; color: ${isSimGw ? 'var(--accent-green)' : 'var(--accent-cyan)'};">${gwText}</td>
+                            <td style="color: ${extState.color}; font-weight: bold;">${stateText}</td>
+                            <td style="color: ${alertColor};">${alertText}</td>
+                            <td>
+                                <div style="font-size:0.78rem; color:var(--accent-cyan); font-weight:bold;">${dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null ? `${dev.wakeCycleCounter}次` : '-'}</div>
+                                <div style="font-size:0.68rem; color:var(--text-muted);">${dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null ? `~${((dev.wakeCycleCounter * 30)/86400).toFixed(1)}天` : ''} ${dev.wakeCycleCounter >= 20000 ? '<span style="color:#fbbf24; font-weight:bold;">(滿7天)</span>' : ''}</div>
+                            </td>
+                            <td>${uptimeStr}</td>
+                            <td style="font-size: 0.76rem;">
+                                <span>${rssiText}</span>
+                                <div style="font-size:0.65rem; color:var(--text-muted); margin-top:2px;">漫遊: ${gwCount}台網關</div>
+                            </td>
+                            <td style="color:var(--text-muted); font-size:0.76rem;">${lastSeenText}</td>
+                            <td>
+                                ${showRemoveBtn ? `<button class="remove-card-btn" onclick="event.stopPropagation(); removeDeviceCard('${dev.mac}')" title="移除此裝置" style="padding: 2px 8px; font-size: 0.72rem; border-radius: 4px;">移除</button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
 
-                        <div class="info-row">
-                            <span class="info-label">上線時間</span>
-                            <span class="info-value" style="color: var(--accent-cyan); font-weight: bold;">⏱️ ${uptimeDisplayStr} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 2px;" title="MQTT Log 上線時間">(${logTimeStr})</span></span>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">中止時間</span>
-                            <span class="info-value" style="color: var(--accent-yellow); font-weight: bold;" title="上線時間後 168 小時預計中止">⏳ ${termDisplayStr} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 2px;">(滿168h)</span></span>
-                        </div>
-
-                        <div class="info-row" style="margin-top: 0.25rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem; font-size: 0.75rem;">
-                            <span class="info-label">${isOffline ? '❌ 已離線' : '⚡ 狀態活躍'}</span>
-                            <span class="info-value" style="color: var(--text-muted); font-weight: normal;">更新於 ${timeStr}</span>
-                        </div>
-
-                        <div style="margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px dashed rgba(255, 255, 255, 0.08); font-size: 0.67rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
-                            <span>💡 10分無訊號/168小時滿期終止</span>
-                            ${isHighRiskSingleGw
-                                ? `<span style="color: var(--accent-red); font-weight: 800; background: rgba(239, 68, 68, 0.15); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3);">🚨 高危險無備援 (1台) ›</span>`
-                                : `<span style="color: var(--accent-cyan); font-weight: 600;">🔍 Gateway 歷程 (${gwCount}台) ›</span>`
-                            }
-                        </div>
-                    </div>
+                tableHtml += `
+                        </tbody>
+                    </table>
                 `;
-            });
 
-            grid.innerHTML = html;
+                if (totalPages > 1) {
+                    tableHtml += `
+                        <div class="pagination-bar" style="display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:1rem; font-size:0.8rem; color:var(--text-muted); width:100%;">
+                            <button onclick="event.stopPropagation(); changeDevicesPage(-1)" ${currentDevicesPage === 1 ? 'disabled' : ''} style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-main); padding:4px 12px; border-radius:4px; cursor:pointer;">上一頁</button>
+                            <span>第 ${currentDevicesPage} / ${totalPages} 頁 (共 ${devicesList.length} 個裝置)</span>
+                            <button onclick="event.stopPropagation(); changeDevicesPage(1)" ${currentDevicesPage === totalPages ? 'disabled' : ''} style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text-main); padding:4px 12px; border-radius:4px; cursor:pointer;">下一頁</button>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML = tableHtml;
+            } else if (currentDashboardViewMode === 'matrix') {
+                // Matrix (Heatmap Dot Grid) Rendering
+                let dotHtml = "";
+                devicesList.forEach((dev, index) => {
+                    const secondsAgo = Math.floor((now - dev.lastSeen) / 1000);
+                    const extState = getDeviceExtendedState(dev, now);
+                    if (!extState.isOffline) onlineCount++;
+
+                    const cleanName = (dev.name || dev.mac || '').toString();
+                    const dotText = cleanName.replace("MEDFLO-", "").replace("MFL-", "").replace("MFS-", "").slice(-4);
+                    const tooltipText = `裝置: ${dev.name}\nMAC: ${dev.mac}\n狀態: ${extState.label}\n最後更新: ${secondsAgo < 5 ? '剛剛' : secondsAgo + '秒前'}\n訊號: ${dev.rssi} dBm`;
+
+                    dotHtml += `
+                        <div class="matrix-dot ${extState.bgClass}" onclick="openBtDeviceModal('${dev.mac}')" title="${tooltipText}">
+                            ${dotText}
+                        </div>
+                    `;
+                });
+
+                grid.innerHTML = dotHtml;
+            }
+
             badge.textContent = `${onlineCount} 個裝置在線`;
             badge.style.background = onlineCount > 0 ? "rgba(16, 185, 129, 0.12)" : "rgba(148, 163, 184, 0.12)";
             badge.style.color = onlineCount > 0 ? "var(--accent-green)" : "var(--text-muted)";
@@ -4423,9 +5209,24 @@
         // Clean dashboard data
         function clearAllDeviceCards() {
             activeDevices = {};
+            removedDevices.clear();
+            localStorage.removeItem('medflow_removed_devices');
             renderDevicesGrid();
             if (typeof addLogMessage === 'function') {
-                addLogMessage('系統', '已一鍵清空面板上所有的藍牙裝置卡片。');
+                addLogMessage('系統', '已一鍵清空面板上所有的藍牙裝置卡片（含手動移除之名單）。');
+            }
+        }
+
+        // Manually remove a device card
+        function removeDeviceCard(mac) {
+            if (confirm(`確定要從面板移除裝置 ${mac.match(/.{1,2}/g).join(':')} 嗎？`)) {
+                removedDevices.add(mac);
+                localStorage.setItem('medflow_removed_devices', JSON.stringify(Array.from(removedDevices)));
+                delete activeDevices[mac];
+                renderDevicesGrid();
+                if (typeof addLogMessage === 'function') {
+                    addLogMessage('系統', `已手動移除裝置卡片 [${mac.match(/.{1,2}/g).join(':')}]。`);
+                }
             }
         }
 
@@ -4527,6 +5328,10 @@
             if (btnOta) btnOta.style.display = (pageId === 'ota') ? 'none' : 'inline-flex';
             if (btnHealth) btnHealth.style.display = (pageId === 'health') ? 'none' : 'inline-flex';
 
+            // Show MQTT status panel on all pages except scanner
+            const mqttStatusPanel = document.getElementById('connection-status-panel');
+            if (mqttStatusPanel) mqttStatusPanel.style.display = (pageId === 'scanner') ? 'none' : '';
+
             if (pageId === 'landing') {
                 headerTitle.textContent = '工具套件總入口';
             } else if (pageId === 'monitor') {
@@ -4544,12 +5349,11 @@
                 }, 100);
             } else if (pageId === 'scanner') {
                 headerTitle.textContent = 'BLE 廣播與硬體掃描分析儀';
-                if (typeof connectionState !== 'undefined' && connectionState === 'disconnected') {
-                    setTimeout(() => {
-                        if (typeof connectMQTT === 'function') connectMQTT();
-                    }, 100);
-                }
+                // Scanner is MQTT-independent — hide MQTT status panel
+                const mqttPanel = document.getElementById('connection-status-panel');
+                if (mqttPanel) mqttPanel.style.display = 'none';
                 renderScannerTable();
+                setTimeout(() => checkLocalBtServerStatus(), 200);
             } else if (pageId === 'pcapp') {
                 headerTitle.textContent = 'PC USB / 網絡工作站';
                 setTimeout(() => {
@@ -4938,41 +5742,69 @@
         let scannerDevices = {}; // MAC -> Device Object
         let isScannerPaused = false;
         let activeScannerTab = 'medflo'; // 'medflo' or 'gateway'
+        function parseBleData(hexStr, isNewFw) {
+            let res = { batteryLow: false, sensorAlert: false, wakeCycleCounter: null, gpio18: null, hasFlags: false };
+            if (!hexStr) return res;
+            let cleanHex = String(hexStr).replace(/\s+/g, '').toUpperCase();
+            if (cleanHex.length < 2) return res;
+            
+            let bytes = [];
+            for (let i = 0; i < cleanHex.length; i += 2) {
+                let b = parseInt(cleanHex.substr(i, 2), 16);
+                if (!isNaN(b)) bytes.push(b);
+            }
+            
+            if (bytes.length >= 4) {
+                res.hasFlags = true;
+                res.gpio18 = (bytes[0] === 1) ? "HIGH" : "LOW";
+                let flags = bytes[1];
+                res.batteryLow = Boolean(flags & 0x01);
+                res.sensorAlert = Boolean(flags & 0x02);
+                res.wakeCycleCounter = bytes[2] | (bytes[3] << 8);
+            } else if (bytes.length >= 2) {
+                res.hasFlags = true;
+                res.gpio18 = (bytes[0] === 1) ? "HIGH" : "LOW";
+                let flags = bytes[1];
+                res.batteryLow = Boolean(flags & 0x01);
+                res.sensorAlert = Boolean(flags & 0x02);
+            } else if (bytes.length >= 1) {
+                res.gpio18 = (bytes[0] === 1) ? "HIGH" : "LOW";
+            }
+            return res;
+        }
 
         // Process Incoming Scanner Data Packets
         function processScannerPacket(devData) {
             if (isScannerPaused || !devData || !devData.mac) return;
-            const mac = devData.mac.replace(/:/g, '').toUpperCase();
+            const mac = devData.mac.replace(/[:-]/g, '').toUpperCase();
             const now = Date.now();
 
-            let isGateway = (devData.isGateway === true) || (devData.gw_type === true) || 
+            let isGateway = (devData.isGateway === true) || (devData.gw_type === true) ||
                             (devData.name && devData.name.toUpperCase().startsWith("NMGW2601-")) ||
-                            (devData.name && devData.name.toUpperCase().startsWith("GW-"));
+                            (devData.name && devData.name.toUpperCase().startsWith("NMGW-"));
 
             let name = devData.name || "";
-            if (isGateway) {
-                if (!name || !name.toUpperCase().startsWith("NMGW2601-")) {
-                    name = `NMGW2601-${mac}`;
-                }
-            } else {
-                if (!name || (!name.toUpperCase().startsWith("MEDFLO-") && !name.toUpperCase().startsWith("NMGW2601-"))) {
-                    name = `MEDFLO-${mac.slice(-12)}`;
-                }
-            }
+            const nameUpper = name.toUpperCase();
+
+            // Only accept MFL- / MFS- (BT v4) and NMGW2601- gateway — drop everything else
+            const isMfl = nameUpper.startsWith("MFL-");
+            const isMfs = nameUpper.startsWith("MFS-");
+            if (!isMfl && !isMfs && !isGateway) return;
 
             // Parse flags & status
+            const isNewFw = name.toUpperCase().startsWith("MFL-") || name.toUpperCase().startsWith("MFS-");
             let parsedFlags = { batteryLow: false, sensorAlert: false, hasFlags: false };
             let rawHex = devData.mfg_hex || devData.raw_hex || devData.data || "";
-            let gpioStatus = (devData.stat === 0) ? "HIGH" : (devData.stat === 1 ? "LOW" : (devData.gpio18 || "-"));
+            let gpioStatus = (devData.gpio18 && devData.gpio18 !== "-") ? devData.gpio18 : ((devData.stat === 1) ? "HIGH" : ((devData.stat === 0) ? "LOW" : "-"));
             let discReason = devData.disc_reason || 0;
 
             if (devData.mfg_hex) {
-                parsedFlags = parseBleData(devData.mfg_hex);
+                parsedFlags = parseBleData(devData.mfg_hex, isNewFw);
             } else if (devData.batteryLow !== undefined) {
                 parsedFlags.batteryLow = devData.batteryLow;
                 parsedFlags.sensorAlert = devData.sensorAlert;
             } else if (devData.data) {
-                parsedFlags = parseBleData(devData.data);
+                parsedFlags = parseBleData(devData.data, isNewFw);
             }
 
             let prevScanWake = scannerDevices[mac] ? scannerDevices[mac].wakeCycleCounter : null;
@@ -5076,9 +5908,9 @@
             const minRssi = parseInt(document.getElementById('scanner-rssi-slider')?.value || "-100", 10);
 
             const allDevs = Object.values(scannerDevices);
-            const medfloDevs = allDevs.filter(d => !d.isGateway);
+            const medfloDevs = allDevs.filter(d => !d.isGateway);  // MFL- and MFS- only
             const gwDevs = allDevs.filter(d => d.isGateway);
-            const alertDevs = allDevs.filter(d => d.batteryLow || d.sensorAlert);
+            const alertDevs = allDevs.filter(d => d.sensorAlert);
 
             // Update Counts Badges
             const elTotal = document.getElementById('scanner-total-devs');
@@ -5119,7 +5951,7 @@
                             <th>MAC Address (位址)</th>
                             <th>RSSI 訊號強度</th>
                             <th>GPIO18 (液位/觸發)</th>
-                            <th>Battery (電池)</th>
+                            <th>Wake Cycle (喚醒週期 / 運作時間)</th>
                             <th>Sensor (狀態)</th>
                             <th style="text-align: center;">Packets (封包)</th>
                             <th>Last Seen (更新)</th>
@@ -5149,7 +5981,7 @@
                     <tr>
                         <td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
                             <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
-                            尚未發現符合篩選條件的 ${activeScannerTab === 'medflo' ? 'MEDFLO-* 傳輸器' : 'NMGW2601-* 網關'} 數據
+                            尚未發現符合篩選條件的 ${activeScannerTab === 'medflo' ? 'MedFlow 傳輸器 (MFL / MFS)' : 'NMGW2601-* 網關'} 數據
                         </td>
                     </tr>
                 `;
@@ -5273,25 +6105,37 @@
                         </tr>
                     `;
                 } else {
-                    let gpioBadge = `<span class="badge-status badge-ok">GPO=1 (空/待機)</span>`;
-                    if (dev.gpio18 === "HIGH" || dev.gpio18 === "1" || dev.gpio18 === 1 || dev.gpio18 === "0") {
-                        gpioBadge = `<span class="badge-status badge-warn">💧 GPO=0 (滿/觸發)</span>`;
+                    let devTypeTag = '';
+                    if (dev.name) {
+                        const uname = dev.name.toUpperCase();
+                        if (uname.startsWith("MFL-")) devTypeTag = '<span style="font-size:0.6rem; background:rgba(59,130,246,0.2); color:#60a5fa; padding:1px 5px; border-radius:3px; font-weight:bold; margin-left:4px;">AS113 樣品</span>';
+                        else if (uname.startsWith("MFS-")) devTypeTag = '<span style="font-size:0.6rem; background:rgba(16,185,129,0.2); color:#34d399; padding:1px 5px; border-radius:3px; font-weight:bold; margin-left:4px;">AS112 貼片</span>';
                     }
 
-                    let wakeCycleBadge = (dev.wakeCycleCounter !== null && dev.wakeCycleCounter !== undefined)
-                        ? `<span class="badge-status badge-ok" style="font-family: monospace;">${dev.wakeCycleCounter}</span>`
+                    let gpioVal = (dev.gpio18 !== undefined && dev.gpio18 !== null) ? dev.gpio18 : dev.gpioStatus;
+                    let gpioBadge = `<span class="badge-status badge-ok">🟢 GPIO18=1 (尿袋空)</span>`;
+                    if (gpioVal === 0 || gpioVal === "0" || gpioVal === "LOW") {
+                        gpioBadge = `<span class="badge-status badge-danger">🔴 GPIO18=0 (尿袋滿/需倒尿)</span>`;
+                    }
+
+                    let counterSec = (dev.wakeCycleCounter !== null && dev.wakeCycleCounter !== undefined) ? (dev.wakeCycleCounter * 30) : null;
+                    let is7Days = dev.wakeCycleCounter >= 20000;
+                    let wakeCycleBadge = counterSec !== null
+                        ? `<div style="font-family: monospace; font-size: 0.8rem; font-weight: bold; color: var(--accent-cyan);">${dev.wakeCycleCounter} 次 <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(~${formatCounterUptime(counterSec)})</span> ${is7Days ? '<span style="color:#fbbf24; font-weight:bold;">(滿7天)</span>' : ''}</div>`
                         : `<span style="color: var(--text-muted); font-family: monospace;">-</span>`;
 
-                    let sensorBadge = `<span class="badge-status badge-ok">OK</span>`;
+                    let sensorBadge = `<span class="badge-status badge-ok">正常</span>`;
                     if (dev.sensorAlert) {
-                        sensorBadge = `<span class="badge-status badge-danger">⚠ ALERT</span>`;
+                        sensorBadge = `<span class="badge-status badge-danger">🚨 感測異常</span>`;
+                    } else if (is7Days) {
+                        sensorBadge = `<span class="badge-status badge-warn" style="color:#fbbf24;">ℹ️ 滿7天建議換藥</span>`;
                     }
 
                     const isAlertRow = dev.sensorAlert;
 
                     html += `
                         <tr class="${isAlertRow ? 'row-alert' : ''}">
-                            <td style="font-weight: 700; color: #fff;">${dev.name}</td>
+                            <td style="font-weight: 700; color: #fff;">${dev.name} ${devTypeTag}</td>
                             <td style="font-family: 'Fira Code', monospace; color: var(--accent-cyan);">${dev.mac}</td>
                             <td>
                                 <div class="rssi-meter-bar">
@@ -5524,8 +6368,9 @@
             const endElem = document.getElementById('bt-modal-end-time');
             if (endElem) endElem.textContent = `${termTimeStr} (上線後 168 小時)`;
 
-            const uptimeText = (typeof formatUptime === 'function') ? formatUptime(uptimeSec) : `${Math.floor(uptimeSec / 3600)}時 ${Math.floor((uptimeSec % 3600) / 60)}分 ${uptimeSec % 60}秒`;
-            document.getElementById('bt-modal-uptime').textContent = `${uptimeText} / 168 小時`;
+            const counterSec = (dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null) ? (dev.wakeCycleCounter * 30) : uptimeSec;
+            const uptimeText = formatCounterUptime(counterSec);
+            document.getElementById('bt-modal-uptime').textContent = `${uptimeText} ${dev.wakeCycleCounter !== undefined && dev.wakeCycleCounter !== null ? `(Counter: ${dev.wakeCycleCounter} 次)` : '/ 168 小時'}`;
 
             // Check service status
             // Rule: > 168h (604,800s) total uptime -> Service Terminated
@@ -5605,12 +6450,12 @@
             document.getElementById('drip-modal-full-ratio').innerText = `${fullPct}% (${fullInWindow}/${windowSize})`;
             document.getElementById('drip-modal-empty-ratio').innerText = `${emptyPct}% (${emptyInWindow}/${windowSize})`;
             
-            const isSampling = windowSize < 20 || dev.confirmedState === -1;
+            const isSampling = (dev.confirmedState === undefined || dev.confirmedState === -1);
             const isFull = !isSampling && dev.confirmedState === 0;
             const confirmedBadgeEl = document.getElementById('drip-modal-confirmed-state');
             
             if (isSampling) {
-                confirmedBadgeEl.innerHTML = `<span style="color: #f59e0b; background: rgba(245,158,11,0.2); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.4); font-weight: 700;">⏳ 採集中: 尚未滿 20 筆 (${windowSize}/20 筆，兩欄皆不亮)</span>`;
+                confirmedBadgeEl.innerHTML = `<span style="color: #f59e0b; background: rgba(245,158,11,0.2); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.4); font-weight: 700;">⏳ 採集中: 尚未收到數據</span>`;
             } else if (isFull) {
                 confirmedBadgeEl.innerHTML = `<span style="color: #fef08a; background: rgba(234,179,8,0.2); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(234,179,8,0.4); font-weight: 700;">💧 確定狀態: 尿袋滿 (GPO=0)</span>`;
             } else {
@@ -6131,7 +6976,7 @@
         // =========================================================
         function formatGatewayId(gwid) {
             if (!gwid || gwid === '-') return '-';
-            let clean = gwid.trim().toUpperCase().replace(/:/g, '');
+            let clean = gwid.trim().toUpperCase().replace(/[:-]/g, '');
             if (clean.startsWith('NMGW2601-')) clean = clean.substring(9);
             else if (clean.startsWith('NMGW2601')) clean = clean.substring(8);
             
@@ -6300,6 +7145,20 @@
                 return `${String(h).padStart(2, '0')}小時${String(m).padStart(2, '0')}分${String(s).padStart(2, '0')}秒`;
             }
             return `${String(m).padStart(2, '0')}分${String(s).padStart(2, '0')}秒`;
+        }
+
+        function formatCounterUptime(totalSec) {
+            if (isNaN(totalSec) || totalSec === null || totalSec === undefined || totalSec < 0) return '00分00秒';
+            const d = Math.floor(totalSec / 86400);
+            const h = Math.floor((totalSec % 86400) / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = Math.floor(totalSec % 60);
+            if (d > 0) {
+                return `${d}天${h}小時${m}分`;
+            } else if (h > 0) {
+                return `${h}小時${m}分${s}秒`;
+            }
+            return `${m}分${s}秒`;
         }
 
         function renderHealthDashboard() {
@@ -6518,6 +7377,106 @@
 
         setInterval(pollPcappGatewayStatus, 1500);
 
+        // Check and update Local PC Bluetooth Engine Status
+        let lastBtStatusSuccess = false;
+        function checkLocalBtServerStatus() {
+            fetch(getApiUrl('/api/ble_status'))
+                .then(res => res.json())
+                .then(data => {
+                    lastBtStatusSuccess = true;
+                    const badge = document.getElementById('local-bt-status-badge');
+                    const desc = document.getElementById('local-bt-status-desc');
+                    if (badge) {
+                        badge.className = 'badge-status badge-ok';
+                        badge.innerHTML = `🟢 本機藍芽硬體: 已開啟 (Bleak Engine 掃描中)`;
+                    }
+                    if (desc) {
+                        desc.textContent = `本機藍芽掃描引擎正常運作中 (${data.engine || 'Bleak'})。目前本機已掃描快取 ${data.active_devices_count || 0} 個活躍裝置 (共 ${data.total_cached_count || 0} 個累積紀錄)。`;
+                    }
+                })
+                .catch(err => {
+                    lastBtStatusSuccess = false;
+                    const badge = document.getElementById('local-bt-status-badge');
+                    const desc = document.getElementById('local-bt-status-desc');
+                    if (badge) {
+                        badge.className = 'badge-status badge-warn';
+                        badge.innerHTML = `⚠️ 本機藍芽 Engine 未連線 (127.0.0.1:8080)`;
+                    }
+                    if (desc) {
+                        desc.textContent = `無法連線至本機 Python 藍芽掃描引擎。請確認是否已啟動 server.py / MedFlow啟動.bat，或可點擊右側「📡 瀏覽器 Web BLE 本機掃描」直接進行掃描。`;
+                    }
+                });
+        }
+
+        // Direct Web Bluetooth LE Scanning (Native Browser PC Adapter API)
+        let webBleScanning = false;
+        async function startWebBleScan() {
+            if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
+                alert("您的瀏覽器尚未開啟 Web Bluetooth 實驗性廣播掃描功能。\n請在 Chrome / Edge 網址列輸入 [ chrome://flags ] 並啟用 [#enable-experimental-web-platform-features]，重新啟動瀏覽器即可支援直連本機藍芽！");
+                return;
+            }
+            try {
+                const scan = await navigator.bluetooth.requestLEScan({
+                    acceptAllAdvertisements: true,
+                    keepRepeatedDevices: true
+                });
+                webBleScanning = true;
+                const badge = document.getElementById('local-bt-status-badge');
+                if (badge) {
+                    badge.className = 'badge-status badge-ok';
+                    badge.innerHTML = `🟢 瀏覽器原生 Web BLE 掃描中...`;
+                }
+                alert("已成功啟動本機電腦 Web Bluetooth 實體廣播掃描！");
+
+                navigator.bluetooth.addEventListener('advertisementreceived', event => {
+                    const dev = event.device;
+                    const mac = dev.id ? dev.id.replace(/[:-]/g, '').toUpperCase() : `DEV_${Math.random().toString(16).substr(2,6).toUpperCase()}`;
+                    const name = dev.name || event.name || "";
+                    const rssi = event.rssi || -70;
+                    let mfgHex = "";
+                    let gpioStatus = 1;
+                    let wakeCycle = null;
+                    let batteryLow = false;
+                    let sensorAlert = false;
+
+                    if (event.manufacturerData) {
+                        for (let [cid, dataView] of event.manufacturerData) {
+                            let hexArr = [];
+                            for (let i = 0; i < dataView.byteLength; i++) {
+                                hexArr.push(dataView.getUint8(i).toString(16).padStart(2, '0').toUpperCase());
+                            }
+                            mfgHex = hexArr.join('');
+                            if (cid === 0xFFFF && hexArr.length >= 4) {
+                                gpioStatus = hexArr[0] === '01' ? 1 : 0;
+                                let flags = parseInt(hexArr[1], 16);
+                                batteryLow = (flags & 0x01) !== 0;
+                                sensorAlert = (flags & 0x02) !== 0;
+                                wakeCycle = parseInt(hexArr[2], 16) | (parseInt(hexArr[3], 16) << 8);
+                            }
+                        }
+                    }
+
+                    if (typeof processScannerPacket === 'function') {
+                        processScannerPacket({
+                            mac: mac,
+                            name: name || `MEDFLO-${mac}`,
+                            rssi: rssi,
+                            gpio18: gpioStatus === 1 ? "HIGH" : "LOW",
+                            gpioStatus: gpioStatus,
+                            wakeCycleCounter: wakeCycle,
+                            data: mfgHex,
+                            rawHex: mfgHex,
+                            batteryLow: batteryLow,
+                            sensorAlert: sensorAlert,
+                            isGateway: name.toUpperCase().startsWith("NMGW2601-") || name.toUpperCase().startsWith("GW-")
+                        });
+                    }
+                });
+            } catch (err) {
+                alert("Web BLE 藍芽掃描授權/啟動失敗: " + err.message);
+            }
+        }
+
         // Poll local PC BLE devices from server.py (BleakScanner background engine)
         function pollLocalBleDevices() {
             if (isScannerPaused) return;
@@ -6535,6 +7494,7 @@
                 .catch(err => {
                     // Server endpoint not reachable or static HTML, silently continue
                 });
+            checkLocalBtServerStatus();
         }
 
         // Poll local PC BLE devices every 1.5 seconds
@@ -6749,6 +7709,37 @@
                 targetPage = savedPage;
             }
             switchPage(targetPage);
+
+            // Auto-update port when protocol is changed
+            const protoSelect = document.getElementById('proto');
+            const portInput = document.getElementById('port');
+            if (protoSelect && portInput) {
+                protoSelect.addEventListener('change', () => {
+                    if (protoSelect.value === 'ws') {
+                        portInput.value = '8083';
+                    } else if (protoSelect.value === 'wss') {
+                        portInput.value = '8083';
+                    }
+                });
+            }
+
+            // Immediately attempt reconnect when window tab becomes visible to bypass background throttling
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    if (connectionState === 'disconnected' && autoReconnectEnabled) {
+                        console.log('Tab visible. Triggering immediate MQTT reconnect...');
+                        cancelReconnect();
+                        connectMQTT();
+                    }
+                }
+            });
+
+            if (typeof updateMqttDisconnectUI === 'function') {
+                updateMqttDisconnectUI();
+            }
+            if (typeof setDashboardViewMode === 'function') {
+                setDashboardViewMode(currentDashboardViewMode);
+            }
 
             if (typeof renderPcappMqttDevicesTable === 'function') {
                 renderPcappMqttDevicesTable();
